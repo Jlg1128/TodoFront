@@ -1,0 +1,274 @@
+.container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    font-size: 16px;
+    color: #777;
+
+    .user-jump {
+        position: absolute;
+        color: rgba(0, 128, 0, 0.8);
+        top: 20px;
+        right: 40px;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .jump-to-login {}
+
+    .settings {
+        margin: 0;
+        // font-size: 12px;
+        transition: height 0.3s;
+        border: 1px solid transparent;
+        text-align: center;
+        height: 0;
+        overflow: hidden;
+
+        li {
+            font-size: inherit;
+            border: none;
+            text-align: center;
+
+            a {
+                font-size: inherit;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+
+            &:hover {
+                background-color: white;
+                cursor: auto;
+            }
+        }
+    }
+
+    .settings-dropdown {
+        height: 50px;
+        border: 1px solid transparent;
+        // width: 50px;
+        box-shadow: 0 0 2px 1px #666;
+    }
+
+    .see-all {
+        // text-decoration: underline;
+    }
+
+    .myInput {
+        outline-style: none;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        padding: 7px 0;
+        width: 80%;
+        font-size: 30px;
+        font-family: "Microsoft soft";
+        font-weight: 400;
+
+        &.height50 {
+            height: 100%;
+            font-weight: 300;
+            width: 100%;
+            padding: 4px 0;
+            font-size: 22px;
+        }
+
+        &.greenInput {
+            color: #666;
+        }
+    }
+
+    .content {
+        // @media screen and (max-width:500px) and (max-height:800px){
+        //     width: 80%;
+        //     height: 70%;
+        // }
+        display: flex;
+        margin: 0 auto;
+        width: 80%;
+        transform: translateY(160px);
+        flex-direction: column;
+        background-color: rgba(0, 128, 0, 0.4);
+
+        .todoitem-li {
+            .todoitem-checkbox-item {
+                display: flex;
+                align-items: center;
+            }
+            label {
+                font-size: 22px;
+                font-weight: 300;
+            }
+            .todoitem-label {
+                height: 100%;
+                padding: 1px 0;
+                cursor: pointer;
+            }
+        }
+    }
+
+    header {
+        position: relative;
+        width: 100%;
+        margin: 0 auto;
+        text-align: center;
+
+        h1 {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+
+            top: -100px;
+            font-size: 80px;
+            color: green;
+
+        }
+
+        .input-container {
+            position: relative;
+            width: 80%;
+            height: 100%;
+            display: inline-block;
+            position: relative;
+
+            input {
+                width: 100%;
+            }
+
+            i {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                right: 10%;
+                color: rgba(102, 102, 102, 0.4);
+                // bottom: 3px;
+            }
+        }
+
+    }
+
+    ul {
+        width: 100%;
+        margin: 5px auto;
+        text-align: center;
+
+        li {
+            padding-left: 10px;
+            border-bottom: 1px solid rgba(102, 102, 102, 0.3);
+            background-color: white;
+            text-align: left;
+            display: inline-block;
+            font-size: 25px;
+            color: #777;
+            width: 80%;
+            padding: 2px;
+            font-weight: 300;
+            transition: all 0.3s;
+
+            &:hover {
+                background-color: rgba(0, 128, 0, 0.5);
+                // color: white;
+            }
+
+            .input-container {
+                width: 90%;
+                display: inline-block;
+                position: relative;
+
+                i {
+                    position: absolute;
+                    font-size: 16px;
+                    width: 30px;
+                    height: 30px;
+                    right: 40px;
+                    // background-color: white;
+                    top: 10px;
+                    cursor: pointer;
+                    color: #777;
+
+                    &:hover {
+                        color: green;
+                    }
+                }
+            }
+        }
+    }
+
+    footer {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-top: 5px;
+        padding: 5px 10% 5px 10%;
+        text-align: center;
+
+        .selectAll {
+            display: flex;
+            align-items: center;
+
+
+            input {
+                transform: translateY(-2px);
+            }
+        }
+
+        .delete {
+            cursor: default;
+            color: rgba(119, 119, 119, 0.6);
+            transition: all 0.2s;
+        }
+
+        .seeCompleted {
+            cursor: default;
+            color: #777;
+        }
+
+        .complete {
+            cursor: default;
+            color: rgba(119, 119, 119, 0.6);
+        }
+
+        .selected {
+            cursor: pointer;
+            color: #777;
+        }
+    }
+
+    input[type=checkbox] {
+        position: relative;
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+
+    input[type=checkbox]::after {
+        position: absolute;
+        top: 0;
+        background-color: white;
+        color: rgba(0, 128, 0, 0.5);
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        visibility: visible;
+        padding-left: 0px;
+        text-align: center;
+        border: 1px solid rgba(0, 128, 0, 0.5);
+        content: ' ';
+        border-radius: 3px
+    }
+
+    input[type=checkbox]:checked::after {
+        content: "✓";
+        font-size: 13px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    label {
+        cursor: pointer;
+    }
+
+}

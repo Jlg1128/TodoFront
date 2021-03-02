@@ -1,0 +1,50 @@
+{
+    "compilerOptions": {
+      "experimentalDecorators": true,
+      "target": "es5",
+      "lib": [
+        "dom",
+        "dom.iterable",
+        "esnext"
+      ],
+      "allowJs": true,
+      "skipLibCheck": true,
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "strict": true,
+      "forceConsistentCasingInFileNames": true,
+      "module": "esnext",
+      "moduleResolution": "node",
+      "resolveJsonModule": true,
+      "isolatedModules": false,
+      "noEmit": true,
+      "jsx": "react",
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["src/*"]
+      }
+    },
+    "include": [
+      "src",
+      "typed-css.d.ts", "typings"
+    ],
+    "exclude": ["node_modules", "build", "dist", "scripts", "test", "webpack"],
+    "typeRoots": [
+      "node",
+      "node_modules/@types",
+      "./typings"
+  ],
+    "babel": {
+      "plugins": [
+        [
+          "@babel/plugin-proposal-decorators",
+          {
+            "legacy": true
+          }
+        ]
+      ],
+      "presets": [
+        "react-app"
+      ]
+    },
+  }
