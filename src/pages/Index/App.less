@@ -92,17 +92,73 @@
         background-color: rgba(0, 128, 0, 0.4);
 
         .todoitem-li {
-            .todoitem-checkbox-item {
+            &:hover {
+                .todoitem-unselected-container {
+                    .todoitem-modifydate {
+                        color: white !important;
+                        display: inline-block !important;
+
+                        a {
+                            color: white !important;
+                        }
+                    }
+                }
+
+                .todoitem-label {
+                    color: white;
+                }
+            }
+
+            .todoitem-container {
+                width: 100%;
                 display: flex;
                 align-items: center;
+
+                .todoitem-unselected-container {
+                    justify-content: space-between;
+
+                    .todoitem-modifydate {
+                        margin-right: 10%;
+                        color: #777;
+                        font-size: 16px;
+
+                        &.todoitem-compeleted-item {
+                            cursor: not-allowed;
+                            color: rgba(119, 119, 119, 0.6);
+
+                            a {
+                                color: inherit !important;
+                                cursor: not-allowed !important;
+                            }
+                        }
+
+                        a {
+                            color: #777;
+                            margin-left: 5px;
+                            transition: color 0.3s;
+                        }
+
+                        span:first-child {
+                            font-weight: 500;
+                            transition: all 0.3s;
+                        }
+                    }
+                }
             }
+
             label {
                 font-size: 22px;
                 font-weight: 300;
+                transition: color 0.3s;
+
+                &:hover {
+                    color: white;
+                }
             }
+
             .todoitem-label {
                 height: 100%;
-                padding: 1px 0;
+                padding: 3.5px 0;
                 cursor: pointer;
             }
         }
@@ -164,11 +220,10 @@
             width: 80%;
             padding: 2px;
             font-weight: 300;
-            transition: all 0.3s;
+            transition: background-color 0.3s;
 
             &:hover {
                 background-color: rgba(0, 128, 0, 0.5);
-                // color: white;
             }
 
             .input-container {
@@ -204,35 +259,54 @@
         padding: 5px 10% 5px 10%;
         text-align: center;
 
-        .selectAll {
+        .select-all-container {
             display: flex;
             align-items: center;
-
 
             input {
                 transform: translateY(-2px);
             }
+
+            .select-all-label {
+                &:hover {
+                    border: 1px solid #777;
+                }
+            }
         }
 
         .delete {
-            cursor: default;
+            cursor: not-allowed;
             color: rgba(119, 119, 119, 0.6);
             transition: all 0.2s;
         }
 
         .seeCompleted {
-            cursor: default;
+            cursor: pointer;
             color: #777;
+
+            &:hover {
+                border: 1px solid #777;
+            }
         }
 
         .complete {
-            cursor: default;
+            cursor: not-allowed;
             color: rgba(119, 119, 119, 0.6);
         }
 
         .selected {
             cursor: pointer;
             color: #777;
+
+            &:hover {
+                border: 1px solid #777;
+            }
+        }
+
+        .hover-button-style {
+            border: 1px solid transparent;
+            padding: 0 3px;
+            transition: all 0.3s;
         }
     }
 

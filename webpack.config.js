@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
 // const webpack = require('webpack');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -23,7 +24,7 @@ module.exports = {
         proxy: { // proxy URLs to backend development server
             '/api': {
                 // target: 'http://localhost:8090',
-                target: isEnvProduction ? 'http://www.towardsky.top' : 'http://localhost:8089',
+                target: isEnvProduction ? 'http://todo.towardsky.top' : 'http://localhost:8089',
             },
         },
         port: 8083,
@@ -116,6 +117,11 @@ module.exports = {
         },
     },
     plugins: [
+        new CopyWebpackPlugin({
+            patterns: [
+                { from: 'public/imgs', to: 'static' },
+            ],
+        }),
         new HtmlWebPackPlugin({
             title: 'my app',
             filename: 'index.html',

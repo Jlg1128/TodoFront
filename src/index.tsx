@@ -3,6 +3,7 @@ import ReactDom from 'react-dom';
 import { Provider } from 'react-redux';
 import { store } from '@/store/store';
 import Routers from './router/route';
+
 import '@/styles/index.less';
 // 监视器模式
 // @ts-ignore

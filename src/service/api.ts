@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import axios from '@/utils/request';
 import { AxiosResponse, Method } from 'axios';
+import { Moment } from 'moment';
 
 export type ResponseDataType<T extends object = object> = {
   msg: string,
@@ -65,22 +66,24 @@ const api: ApiMapType = {
     method: 'post',
   },
 };
-
 export type TodoItem = {
   id: number,
   content: string,
   isCompleted: boolean,
+  createTime: Moment | null,
+  targetCompleteTime: Moment | null,
+  completedTime: Moment | null,
 }
 
 export type User = {
-  id?: number,
+  id: number,
   create_time: string,
   nickname: string,
   password?: string,
   avatar: string,
   phone_number: string,
   email: string,
-  todo_list: Array<TodoItem>
+  todo_list: TodoItem[],
 }
 
 export function login(nickname: string, password: string): Promise<ResponseDataType<User>> {

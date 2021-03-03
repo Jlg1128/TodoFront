@@ -15,7 +15,6 @@ export enum UserDispatchType {
 }
 
 export const userInfo = (state = user, action: { type: UserDispatchType, payload: User }) => {
-    console.log('payload', action.payload);
     switch (action.type) {
         case UserDispatchType.LOGIN:
             return { ...state, ...action.payload };

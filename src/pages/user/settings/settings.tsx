@@ -3,6 +3,7 @@ import React, { Dispatch, useEffect, useState } from 'react';
 import * as api from '@/service/api';
 import { connect } from 'react-redux';
 import { Modal, Form, Input, Select, Button, message } from 'antd';
+import logo1 from '@/assets/logo1.png';
 import './settings.less';
 import { User } from '@/pages/Index/App';
 import { UserDispatchType, userInfo } from '@/store/reducer/userInfoReducer';
@@ -168,6 +169,7 @@ const Settings: React.FC<Props> = (
             ]}
           >
             <Input placeholder="请输入邮箱地址" maxLength={30} />
+            <img src={logo1} alt="" />
           </Form.Item>
         </Form>
         <Button className='form-button' type='primary' style={{ marginRight: 10 }} onClick={() => handleOk()}>更改</Button>

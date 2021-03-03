@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run dev",
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --host 0.0.0.0  --hot",
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --progress --host 0.0.0.0  --hot",
     "build": "cross-env NODE_ENV=production webpack",
     "server": "node ./server/server.js"
   },
@@ -20,6 +20,7 @@
     "echarts": "^4.9.0",
     "eslint": "^7.13.0",
     "history": "^5.0.0",
+    "moment": "^2.29.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-redux": "^7.2.2",
@@ -46,6 +47,7 @@
     "babel": "^6.23.0",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.1.0",
+    "copy-webpack-plugin": "^6.4.1",
     "cross-env": "^7.0.2",
     "css-loader": "^5.0.1",
     "eslint-config-airbnb": "^18.2.1",

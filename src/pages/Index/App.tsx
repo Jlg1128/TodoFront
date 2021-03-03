@@ -4,8 +4,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable max-len */
 import React, { Dispatch, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import LoginModal from '@/components/loginModal/loginModal';
-import RegisterModal from '@/components/registerModal/registerModal';
+import LoginModal from '@/pages/Index/components/loginModal/loginModal';
+import RegisterModal from '@/pages/Index/components/registerModal/registerModal';
+import AddModal from '@/pages/Index/components/addModal/addModal';
 import * as api from '@/service/api';
 import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
@@ -14,6 +15,7 @@ import { ACCOUNTTYPEDISPATCHTYPE } from '@/store/reducer/accountTypeReducer';
 import { useHistory } from 'react-router-dom';
 import './App.less';
 import { message } from 'antd';
+import moment, { Moment } from 'moment';
 
 // 查看todo，一种是全部，一种是完成的
 enum TODOMODE {
@@ -26,6 +28,9 @@ export type TodoItem = {
   id: number,
   content: string,
   isCompleted: boolean,
+  createTime: Moment | null,
+  targetCompleteTime: Moment | null,
+  completedTime: Moment | null,
 }
 
 export type User = {
@@ -58,12 +63,26 @@ const App: React.FC<Props> = ({
   // 处于编辑状态的todo索引
   const [editIndex, setEditIndex] = useState<number>(-1);
   const [editVal, setEditVal] = useState<string>('');
+  const [hoverIndex, setHoverIndex] = useState<number>(-1);
   // 所有选中的索引
   const [selectedIndex, setSelectedIndex] = useState<number[]>([]);
   const [todoList, setTodoList] = useState<TodoItem[]>([]);
   // 是否全选
   const [ifSelectAll, setIfSelectedAll] = useState<boolean>(false);
   const [userInfoShow, setrUserInfoShow] = useState<boolean>(false);
+  const [addModalVisible, setAddModalVisible] = useState<boolean>(false);
+  const [modifyModalVisible, setModifyModalVisible] = useState<boolean>(false);
+  const [modifyInfo, setModifyInfo] = useState<
+    {
+      modifyIndex: number,
+      modifyOldTime: Moment
+    }>(
+      {
+        modifyIndex: -1,
+        modifyOldTime: moment(),
+      },
+
+    );
   const [modalState, setModalsStates] = useState({
     loginModalVisible: false,
     registerModalVisible: false,
@@ -104,17 +123,25 @@ const App: React.FC<Props> = ({
     // 回车
     if (event.key && event.key.toString() === 'Enter') {
       if (content !== '' && content !== null) {
-        handleAdd(accountType, content, JSON.parse(localStorage.getItem("todoList") || "[]") || []);
-        if (contentInputRef.current != null) {
-          contentInputRef.current.value = '';
-        }
+        setAddModalVisible(true);
+        // handleAdd(accountType, content, JSON.parse(localStorage.getItem("todoList") || "[]") || []);
       }
     }
   }
 
-  async function handleAdd(accountType: ACCOUNTTYPEDISPATCHTYPE, todoInputMsg: string, oldTodoList: TodoItem[]) {
+  async function handleAdd(accountType: ACCOUNTTYPEDISPATCHTYPE, todoInputMsg: string, oldTodoList: TodoItem[], targetCompleteTime: Moment | null) {
     const id = oldTodoList[oldTodoList.length - 1] ? oldTodoList[oldTodoList.length - 1].id + 1 : 1;
-    let newTodoList: TodoItem[] = oldTodoList ? [...oldTodoList, { id, content: todoInputMsg, isCompleted: false }] : [{ id, content: todoInputMsg, isCompleted: false }];
+    const needAddItem: TodoItem = {
+      id,
+      content: todoInputMsg,
+      isCompleted: false,
+      completedTime: null,
+      targetCompleteTime,
+      createTime: moment(),
+    };
+
+    // @ts-ignore
+    let newTodoList: TodoItem[] = oldTodoList ? [...oldTodoList, needAddItem] : [needAddItem];
     updateTodoList(accountType, newTodoList);
   }
 
@@ -132,6 +159,7 @@ const App: React.FC<Props> = ({
     console.log('双击了');
     setEditIndex(id);
   }
+
   function handleEditOnBlur(id: number, content: string) {
     let newTodoList = [...todoList.map((item, index) => {
       if (item.id === id) {
@@ -142,24 +170,45 @@ const App: React.FC<Props> = ({
     updateTodoList(accountType, newTodoList);
     setEditIndex(-1);
   }
+
   function renderTodos(renderedTodoList: TodoItem[]) {
     if (mode === TODOMODE.AllTODO) {
-      return renderedTodoList.map((todoItem, index) => renderTodoItem(todoItem, mode));
+      return renderedTodoList.map((todoItem, index) => renderTodoItem(todoItem, mode, index));
     }
-    return renderedTodoList.filter((todoItem, index) => todoItem.isCompleted === true).map((todoItem, index) => renderTodoItem(todoItem, mode));
+    return renderedTodoList.filter((todoItem, index) => todoItem.isCompleted === true).map((todoItem, index) => renderTodoItem(todoItem, mode, index));
   }
 
-  function renderTodoItem(todoItem: TodoItem, mode: TODOMODE) {
+  function renderTodoItem(todoItem: TodoItem, mode: TODOMODE, index: number) {
+    let timestamp = '';
+    let processedTime = '';
+    if (todoItem.isCompleted) {
+      // @ts-ignore
+      timestamp = Date.parse(todoItem.completedTime);
+      processedTime = (timestamp && moment(timestamp).format('MM-DD HH:mm:ss')) || "暂无设置时间";
+    } else {
+      // @ts-ignore
+      timestamp = Date.parse(todoItem.targetCompleteTime);
+      processedTime = (timestamp && moment(timestamp).format('MM-DD HH:mm:ss')) || "暂无设置时间";
+    }
+
     return <li className='todoitem-li' key={todoItem.id}>
-      <span className='todoitem-checkbox-item'>
+      <span className='todoitem-container'>
         <input checked={selectedIndex.includes(todoItem.id)} onChange={(e) => handleCheckBoxChange(todoItem.id, e.currentTarget.checked)} type="checkbox" />
         {todoItem.id === editIndex ? <div className='input-container'>
           <input onChange={(e) => setEditVal(e.currentTarget.value)} defaultValue={todoItem.content} onBlur={(e) => handleEditOnBlur(todoItem.id, e.currentTarget.value)} className='myInput height50' />
           <i onClick={() => { handleEditOnBlur(todoItem.id, editVal); }}>✓</i>
         </div>
-          : <label className='todoitem-label' htmlFor='todoitem' onClick={() => handleEditStatusToggel(todoItem.id)}>
-            {mode === TODOMODE.COMPELETED || todoItem.isCompleted === true ? <del>{todoItem.content}</del> : todoItem.content || "无内容"}
-          </label>
+          : <span className='todoitem-container todoitem-unselected-container'>
+            <label className='todoitem-label' htmlFor='todoitem' onDoubleClick={() => handleEditStatusToggel(todoItem.id)}>
+              {mode === TODOMODE.COMPELETED || todoItem.isCompleted === true ? <del>{todoItem.content}</del> : todoItem.content || "无内容"}
+            </label>
+            <i className={`todoitem-modifydate ${todoItem.isCompleted ? 'todoitem-compeleted-item' : ''}`}>
+              {mode === TODOMODE.COMPELETED || todoItem.isCompleted === true ? <span>完成时间:</span> : <span>目标时间:</span>}
+              <a onClick={() => { handleModifyComelteTodo(todoItem.id, moment(timestamp) || ''); }}>
+                {processedTime}
+              </a>
+            </i>
+          </span>
         }
       </span>
     </li>;
@@ -211,6 +260,8 @@ const App: React.FC<Props> = ({
     let processedTodoList = todoList.map((item, index) => {
       if (ids.includes(item.id)) {
         item.isCompleted = true;
+        // @ts-ignore
+        item.completedTime = moment().format('YYYY-MM-DD HH:mm:ss');
       }
       return item;
     });
@@ -351,8 +402,59 @@ const App: React.FC<Props> = ({
     message.success("退出成功");
   }
 
+  function handleAddModalOk(targetCompletedTime: Moment | null) {
+    handleAdd(accountType, (contentInputRef.current && contentInputRef.current.value) || '', JSON.parse(localStorage.getItem("todoList") || "[]") || [], targetCompletedTime);
+    if (contentInputRef.current != null) {
+      contentInputRef.current.value = '';
+    }
+    setAddModalVisible(false);
+  }
+  function handleAddModalCancel() {
+    setAddModalVisible(false);
+  }
+
+  function handleModifyComelteTodo(id: number, targetCompleteTime: Moment) {
+    setModifyInfo(
+      {
+        modifyIndex: id, modifyOldTime: targetCompleteTime,
+      },
+    );
+    setModifyModalVisible(true);
+  }
+
+  function handleModifyModalOk(targetCompleteTime: Moment | null) {
+    let newTodoList = [...todoList.map((item, index) => {
+      if (item.id === modifyInfo.modifyIndex) {
+        item.targetCompleteTime = targetCompleteTime;
+      }
+      return item;
+    })];
+    updateTodoList(accountType, newTodoList);
+    setModifyModalVisible(false);
+    setEditIndex(-1);
+  }
+  function handleModifyModalCancel() {
+    setModifyModalVisible(false);
+  }
   return (
     <div className='container'>
+      <AddModal
+        onOk={handleAddModalOk}
+        onCancel={handleAddModalCancel}
+        title='预计完成时间'
+        content=""
+        visible={addModalVisible}
+        cancleButtonExit={false}
+      />
+      <AddModal
+        onOk={handleModifyModalOk}
+        onCancel={handleModifyModalCancel}
+        title='修改完成时间'
+        content=""
+        defaultValue={modifyInfo.modifyOldTime}
+        visible={modifyModalVisible}
+        cancleButtonExit={false}
+      />
       <LoginModal
         cancleButtonExit={false}
         gotoRegister={() => setModalsStates({ ...modalState, registerModalVisible: true })}
@@ -400,17 +502,17 @@ const App: React.FC<Props> = ({
           {renderTodos(todoList)}
         </ul>
         <footer>
-          <span className='selectAll'>
+          <span className='select-all-container'>
             <input checked={ifSelectAll} onChange={(e) => selectedAll(e.currentTarget.checked)} type="checkbox" />
-            <label htmlFor='selectAll'>
+            <label className='hover-button-style select-all-label' htmlFor='selectAll'>
               选中全部
             </label>
           </span>
-          <span onClick={() => seeFinishedTodo()} className='seeCompleted'>
+          <span onClick={() => seeFinishedTodo()} className='seeCompleted hover-button-style'>
             {mode === TODOMODE.AllTODO ? '查看完成的todo' : '查看所有的todo'}
           </span>
-          <span onClick={() => deleteTodo(selectedIndex)} className={`delete ${selectedStyle}`}>删除</span>
-          <span onClick={() => finishTodo(selectedIndex)} className={`complete ${selectedStyle}`}>完成</span>
+          <span onClick={() => deleteTodo(selectedIndex)} className={`delete ${selectedStyle} hover-button-style`}>删除</span>
+          <span onClick={() => finishTodo(selectedIndex)} className={`complete ${selectedStyle} hover-button-style`}>完成</span>
         </footer>
       </div>
     </div>
