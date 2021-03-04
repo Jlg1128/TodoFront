@@ -1,80 +1,30 @@
 .container {
     position: relative;
     width: 100vw;
-    height: 100vh;
+    // height: 100%;
     font-size: 16px;
     color: #777;
 
-    .user-jump {
-        position: absolute;
-        color: rgba(0, 128, 0, 0.8);
-        top: 20px;
-        right: 40px;
-        font-size: 13px;
-        cursor: pointer;
-    }
-
-    .jump-to-login {}
-
-    .settings {
-        margin: 0;
-        // font-size: 12px;
-        transition: height 0.3s;
-        border: 1px solid transparent;
-        text-align: center;
-        height: 0;
-        overflow: hidden;
-
-        li {
-            font-size: inherit;
-            border: none;
-            text-align: center;
-
-            a {
-                font-size: inherit;
-
-                &:hover {
-                    text-decoration: underline;
-                }
-            }
-
-            &:hover {
-                background-color: white;
-                cursor: auto;
-            }
-        }
-    }
-
-    .settings-dropdown {
-        height: 50px;
-        border: 1px solid transparent;
-        // width: 50px;
-        box-shadow: 0 0 2px 1px #666;
-    }
-
-    .see-all {
-        // text-decoration: underline;
-    }
-
-    .myInput {
+    .todoitem-input {
         outline-style: none;
         border: 1px solid #ccc;
         border-radius: 3px;
-        padding: 7px 0;
+        padding: 7px 0 7px 5px;
         width: 80%;
         font-size: 30px;
         font-family: "Microsoft soft";
-        font-weight: 400;
+        font-weight: 300;
 
-        &.height50 {
+        &.todoitem-edit-input {
             height: 100%;
             font-weight: 300;
             width: 100%;
             padding: 4px 0;
+            text-overflow: ellipsis;
             font-size: 22px;
         }
 
-        &.greenInput {
+        &.green-input {
             color: #666;
         }
     }
@@ -87,7 +37,7 @@
         display: flex;
         margin: 0 auto;
         width: 80%;
-        transform: translateY(160px);
+        transform: translateY(100px);
         flex-direction: column;
         background-color: rgba(0, 128, 0, 0.4);
 
@@ -106,6 +56,8 @@
 
                 .todoitem-label {
                     color: white;
+                    text-overflow: ellipsis;
+
                 }
             }
 
@@ -159,7 +111,15 @@
             .todoitem-label {
                 height: 100%;
                 padding: 3.5px 0;
+                max-width: 50%;
+                overflow: hidden;
+                text-overflow: ellipsis;
                 cursor: pointer;
+
+                del {
+                    max-width: 50%;
+                    text-overflow: ellipsis;
+                }
             }
         }
     }
@@ -175,7 +135,7 @@
             left: 50%;
             transform: translateX(-50%);
 
-            top: -100px;
+            top: -120px;
             font-size: 80px;
             color: green;
 
@@ -278,6 +238,7 @@
             cursor: not-allowed;
             color: rgba(119, 119, 119, 0.6);
             transition: all 0.2s;
+
         }
 
         .seeCompleted {

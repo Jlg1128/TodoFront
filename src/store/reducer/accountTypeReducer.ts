@@ -3,15 +3,21 @@ export enum ACCOUNTTYPEDISPATCHTYPE {
   MEMBER = "member",
 }
 
-const accountType = ACCOUNTTYPEDISPATCHTYPE.TOURIST;
+const initialAccountType = {
+  accountType: 'tourist',
+};
 
-export const account = (state = accountType, action: { type: ACCOUNTTYPEDISPATCHTYPE }) => {
+export const account = (state = initialAccountType, action: { type: ACCOUNTTYPEDISPATCHTYPE }) => {
   switch (action.type) {
     case ACCOUNTTYPEDISPATCHTYPE.TOURIST:
-      return "tourist";
+      return {
+        ...state, accountType: 'tourist',
+      };
     case ACCOUNTTYPEDISPATCHTYPE.MEMBER:
-      return "member";
+      return {
+        ...state, accountType: 'member',
+      };
     default:
-      return "tourist";
+      return state;
   }
 };

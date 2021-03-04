@@ -1,21 +1,17 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-/* eslint-disable jsx-a11y/mouse-events-have-key-events */
-/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable max-len */
-import React, { Dispatch, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import LoginModal from '@/pages/Index/components/loginModal/loginModal';
-import RegisterModal from '@/pages/Index/components/registerModal/registerModal';
-import AddModal from '@/pages/Index/components/addModal/addModal';
+import React, { Dispatch, useEffect, useRef, useState } from 'react';
+
+import EditInputModal from '@/pages/Index/components/editModal/editModal';
 import * as api from '@/service/api';
 import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
-import { UserDispatchType } from '@/store/reducer/userInfoReducer';
+import { UserDispatchType, userInfo } from '@/store/reducer/userInfoReducer';
 import { ACCOUNTTYPEDISPATCHTYPE } from '@/store/reducer/accountTypeReducer';
-import { useHistory } from 'react-router-dom';
 import './App.less';
-import { message } from 'antd';
 import moment, { Moment } from 'moment';
+import { message } from 'antd';
 
 // 查看todo，一种是全部，一种是完成的
 enum TODOMODE {
@@ -23,78 +19,61 @@ enum TODOMODE {
   COMPELETED
 }
 
-let a = 1;
-export type TodoItem = {
-  id: number,
-  content: string,
-  isCompleted: boolean,
-  createTime: Moment | null,
-  targetCompleteTime: Moment | null,
-  completedTime: Moment | null,
-}
-
-export type User = {
-  id: number,
-  create_time: string,
-  nickname: string,
-  password?: string,
-  avatar: string,
-  phone_number: string,
-  email: string,
-  todo_list: TodoItem[],
-}
-
 type Props = {
   dispatch: Dispatch<AnyAction>;
-  userInfo: User;
-  accountType: ACCOUNTTYPEDISPATCHTYPE;
+  userInfo: api.User;
+  account: {
+    accountType: ACCOUNTTYPEDISPATCHTYPE,
+  };
+}
+
+type User = api.User;
+
+type TodoItem = api.TodoItem;
+
+enum ModifyType {
+  ADD = '添加',
+  DELETE = '删除',
+  UPDATE = '更新',
+  FINISH = '完成',
+}
+
+type ModifyInfo = {
+  modifyIndex: number,
+  modifyOldTime: Moment
 }
 
 const App: React.FC<Props> = ({
   dispatch,
   userInfo,
-  accountType,
-  ...other
+  account: { accountType },
 }) => {
-  const history = useHistory();
   // 查看todo的模式
   const [mode, setLookMode] = useState<TODOMODE>(TODOMODE.AllTODO);
   const contentInputRef = useRef<HTMLInputElement>(null);
   // 处于编辑状态的todo索引
   const [editIndex, setEditIndex] = useState<number>(-1);
   const [editVal, setEditVal] = useState<string>('');
-  const [hoverIndex, setHoverIndex] = useState<number>(-1);
   // 所有选中的索引
   const [selectedIndex, setSelectedIndex] = useState<number[]>([]);
   const [todoList, setTodoList] = useState<TodoItem[]>([]);
   // 是否全选
   const [ifSelectAll, setIfSelectedAll] = useState<boolean>(false);
-  const [userInfoShow, setrUserInfoShow] = useState<boolean>(false);
   const [addModalVisible, setAddModalVisible] = useState<boolean>(false);
   const [modifyModalVisible, setModifyModalVisible] = useState<boolean>(false);
-  const [modifyInfo, setModifyInfo] = useState<
+  // 更改时间相关的信息
+  const [modifyInfo, setModifyInfo] = useState<ModifyInfo>(
     {
-      modifyIndex: number,
-      modifyOldTime: Moment
-    }>(
-      {
-        modifyIndex: -1,
-        modifyOldTime: moment(),
-      },
-
-    );
-  const [modalState, setModalsStates] = useState({
-    loginModalVisible: false,
-    registerModalVisible: false,
-    loginModalLoading: false,
-    registerModalLoading: false,
-  });
+      modifyIndex: -1,
+      modifyOldTime: moment(),
+    },
+  );
 
   useEffect(() => {
     if (localStorage.getItem('userInfo') !== null
     ) {
       let user: User = JSON.parse(localStorage.getItem('userInfo') || '{}');
-      if (!(userInfo.nickname || userInfo.id) && user.nickname && user.id) {
+      if (user.nickname && user.id) {
         dispatch({
           type: UserDispatchType.LOGIN,
           payload: user,
@@ -108,11 +87,12 @@ const App: React.FC<Props> = ({
       localStorage.setItem("accountType", JSON.stringify(ACCOUNTTYPEDISPATCHTYPE.TOURIST));
     }
     if (localStorage.getItem('todoList')
-      && JSON.parse(localStorage.getItem('todoList') || '[]')
+      && Array.isArray(JSON.parse(localStorage.getItem('todoList') || '[]'))
       && JSON.parse(localStorage.getItem('todoList') || '[]').length !== 0
     ) {
       setTodoList(JSON.parse(localStorage.getItem('todoList') || '[]'));
     }
+    // 监听回车
     // @ts-ignore
     window.addEventListener('keydown', (event) => handleEnterClick(JSON.parse(localStorage.getItem("accountType")), event, contentInputRef.current ? contentInputRef.current.value : ''));
     // @ts-ignore
@@ -124,10 +104,18 @@ const App: React.FC<Props> = ({
     if (event.key && event.key.toString() === 'Enter') {
       if (content !== '' && content !== null) {
         setAddModalVisible(true);
-        // handleAdd(accountType, content, JSON.parse(localStorage.getItem("todoList") || "[]") || []);
       }
     }
   }
+
+  // 监听账户类型的切换改变current todolist
+  useEffect(() => {
+    if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER && userInfo.nickname && userInfo.id !== -1) {
+      setTodoList(userInfo.todo_list);
+    } else {
+      setTodoList(JSON.parse(localStorage.getItem("todoList") || '[]'));
+    }
+  }, [accountType]);
 
   async function handleAdd(accountType: ACCOUNTTYPEDISPATCHTYPE, todoInputMsg: string, oldTodoList: TodoItem[], targetCompleteTime: Moment | null) {
     const id = oldTodoList[oldTodoList.length - 1] ? oldTodoList[oldTodoList.length - 1].id + 1 : 1;
@@ -142,7 +130,7 @@ const App: React.FC<Props> = ({
 
     // @ts-ignore
     let newTodoList: TodoItem[] = oldTodoList ? [...oldTodoList, needAddItem] : [needAddItem];
-    updateTodoList(accountType, newTodoList);
+    updateTodoList(accountType, newTodoList, ModifyType.ADD);
   }
 
   function handleCheckBoxChange(idx: number, ifSelected: boolean) {
@@ -156,7 +144,6 @@ const App: React.FC<Props> = ({
   }
 
   function handleEditStatusToggel(id: number) {
-    console.log('双击了');
     setEditIndex(id);
   }
 
@@ -167,7 +154,7 @@ const App: React.FC<Props> = ({
       }
       return item;
     })];
-    updateTodoList(accountType, newTodoList);
+    updateTodoList(accountType, newTodoList, ModifyType.UPDATE);
     setEditIndex(-1);
   }
 
@@ -195,16 +182,20 @@ const App: React.FC<Props> = ({
       <span className='todoitem-container'>
         <input checked={selectedIndex.includes(todoItem.id)} onChange={(e) => handleCheckBoxChange(todoItem.id, e.currentTarget.checked)} type="checkbox" />
         {todoItem.id === editIndex ? <div className='input-container'>
-          <input onChange={(e) => setEditVal(e.currentTarget.value)} defaultValue={todoItem.content} onBlur={(e) => handleEditOnBlur(todoItem.id, e.currentTarget.value)} className='myInput height50' />
+          <input maxLength={30}
+            onChange={(e) => setEditVal(e.currentTarget.value)}
+            defaultValue={todoItem.content}
+            onBlur={(e) => handleEditOnBlur(todoItem.id, e.currentTarget.value)}
+            className='todoitem-input todoitem-edit-input' />
           <i onClick={() => { handleEditOnBlur(todoItem.id, editVal); }}>✓</i>
         </div>
           : <span className='todoitem-container todoitem-unselected-container'>
-            <label className='todoitem-label' htmlFor='todoitem' onDoubleClick={() => handleEditStatusToggel(todoItem.id)}>
+            <label className='todoitem-label' htmlFor='todoitem' onClick={() => handleEditStatusToggel(todoItem.id)}>
               {mode === TODOMODE.COMPELETED || todoItem.isCompleted === true ? <del>{todoItem.content}</del> : todoItem.content || "无内容"}
             </label>
             <i className={`todoitem-modifydate ${todoItem.isCompleted ? 'todoitem-compeleted-item' : ''}`}>
               {mode === TODOMODE.COMPELETED || todoItem.isCompleted === true ? <span>完成时间:</span> : <span>目标时间:</span>}
-              <a onClick={() => { handleModifyComelteTodo(todoItem.id, moment(timestamp) || ''); }}>
+              <a onClick={() => { !todoItem.isCompleted && handleModifyComelteTodo(todoItem.id, timestamp ? moment(timestamp) : moment()); }}>
                 {processedTime}
               </a>
             </i>
@@ -217,11 +208,16 @@ const App: React.FC<Props> = ({
   const selectedStyle = selectedIndex.length > 0 ? 'selected' : '';
 
   useEffect(() => {
-    if (localStorage.getItem("userInfo") === null) {
-      localStorage.setItem('todoList', JSON.stringify(todoList));
-    } else {
-      console.log('api操作');
+    // 如果是有账户的话，每次todolist变化都需要将新的user存入localstorage
+    if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER && userInfo.nickname && userInfo.id !== -1) {
+      let newUser = { ...userInfo, todo_list: todoList };
+      dispatch({
+        type: UserDispatchType.MODIFYUSER,
+        payload: newUser,
+      });
+      localStorage.setItem("userInfo", JSON.stringify(newUser));
     }
+    localStorage.setItem('todoList', JSON.stringify(todoList));
   }, [todoList]);
 
   useEffect(() => {
@@ -236,22 +232,27 @@ const App: React.FC<Props> = ({
     }
   }, [selectedIndex]);
 
-  async function updateTodoList(accountType: ACCOUNTTYPEDISPATCHTYPE, newTodoList: TodoItem[]) {
-    console.log(accountType);
+  async function updateTodoList(accountType: ACCOUNTTYPEDISPATCHTYPE, newTodoList: TodoItem[], type: ModifyType) {
+    let wrong = true;
     if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER) {
-      // @ts-ignore
-      const userInfo = localStorage.getItem('userInfo') && JSON.parse(localStorage.getItem('userInfo'));
       await api.updateTodoListById(userInfo.id, newTodoList);
       let res = await api.getTodoListById(userInfo.id);
       if (res.data) {
         newTodoList = res.data;
+      } else {
+        wrong = false;
       }
     }
     localStorage.setItem('todoList', JSON.stringify(newTodoList));
     setTodoList(newTodoList);
+    if (wrong) {
+      type !== ModifyType.FINISH && message.success(`${type}成功`);
+      return;
+    }
+    message.success(`${type}失败`);
   }
   function deleteTodo(ids: number[]) {
-    updateTodoList(accountType, [...todoList.filter((item, index) => !ids.includes(item.id))]);
+    updateTodoList(accountType, [...todoList.filter((item, index) => !ids.includes(item.id))], ModifyType.DELETE);
     setSelectedIndex([...selectedIndex.filter((item, index) => !ids.includes(item))]);
   }
 
@@ -265,7 +266,7 @@ const App: React.FC<Props> = ({
       }
       return item;
     });
-    updateTodoList(accountType, [...processedTodoList]);
+    updateTodoList(accountType, [...processedTodoList], ModifyType.FINISH);
   }
 
   function selectedAll(ifSelectedAll: boolean) {
@@ -288,118 +289,6 @@ const App: React.FC<Props> = ({
     } else {
       setLookMode(TODOMODE.AllTODO);
     }
-  }
-
-  function handleJump(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
-    e.stopPropagation();
-    setModalsStates({
-      ...modalState, loginModalVisible: true,
-    });
-  }
-
-  function login(nickname: string, password: string) {
-    let flag = false;
-    setModalsStates(
-      {
-        ...modalState, loginModalLoading: true, loginModalVisible: true,
-      },
-    );
-    api.login(nickname, password).then((res) => {
-      if (res && res.success === true && res.data != null && !!res.data.nickname) {
-        localStorage.setItem('userInfo', JSON.stringify(res.data));
-        localStorage.setItem('accountType', JSON.stringify(ACCOUNTTYPEDISPATCHTYPE.MEMBER));
-        localStorage.setItem('todoList', JSON.stringify(res.data.todo_list || []));
-        setTodoList(res.data.todo_list);
-        dispatch({
-          type: UserDispatchType.LOGIN,
-          payload: res.data,
-        });
-        dispatch({
-          type: ACCOUNTTYPEDISPATCHTYPE.MEMBER,
-        });
-        message.success("登录成功");
-        setModalsStates(
-          {
-            ...modalState, loginModalLoading: false, loginModalVisible: false,
-          },
-        );
-        flag = true;
-      } else {
-        message.error(res && res.msg);
-        setModalsStates(
-          {
-            ...modalState, loginModalLoading: false,
-          },
-        );
-        flag = false;
-      }
-    });
-    return flag;
-  }
-
-  function register(nickname: string, password: string): boolean {
-    let flag = false;
-    setModalsStates(
-      {
-        ...modalState, registerModalLoading: true, registerModalVisible: true,
-      },
-    );
-    api.register({ ...userInfo, password, nickname }).then((res) => {
-      if (res && res.success === true && res.data != null && !!res.data.nickname) {
-        message.success("注册成功，直接为您登录！");
-        localStorage.setItem('userInfo', JSON.stringify(res.data));
-        localStorage.setItem('accountType', JSON.stringify(ACCOUNTTYPEDISPATCHTYPE.MEMBER));
-        localStorage.setItem('todoList', JSON.stringify(res.data.todo_list || []));
-        setTodoList(res.data.todo_list);
-        dispatch({
-          type: UserDispatchType.LOGIN,
-          payload: res.data,
-        });
-        dispatch({
-          type: ACCOUNTTYPEDISPATCHTYPE.MEMBER,
-        });
-        setModalsStates(
-          {
-            ...modalState, registerModalLoading: false, registerModalVisible: false, loginModalVisible: false,
-          },
-        );
-        flag = true;
-      } else {
-        message.error(res && res.msg);
-        setModalsStates(
-          {
-            ...modalState, registerModalLoading: false,
-          },
-        );
-        flag = true;
-      }
-    });
-    return flag;
-  }
-  function handleLoginCancel() {
-    setModalsStates({
-      ...modalState, loginModalVisible: false,
-    });
-  }
-  function handleRegisterCancel() {
-    setModalsStates({
-      ...modalState, registerModalVisible: false,
-    });
-  }
-  function jumpToSettings() {
-    history.push('/user/settings');
-  }
-  function quit() {
-    localStorage.clear();
-    dispatch({
-      type: UserDispatchType.LOGIN,
-      payload: null,
-    });
-    dispatch({
-      type: ACCOUNTTYPEDISPATCHTYPE.TOURIST,
-    });
-    setTodoList([]);
-    message.success("退出成功");
   }
 
   function handleAddModalOk(targetCompletedTime: Moment | null) {
@@ -429,74 +318,42 @@ const App: React.FC<Props> = ({
       }
       return item;
     })];
-    updateTodoList(accountType, newTodoList);
+    updateTodoList(accountType, newTodoList, ModifyType.UPDATE);
     setModifyModalVisible(false);
     setEditIndex(-1);
   }
+
   function handleModifyModalCancel() {
     setModifyModalVisible(false);
   }
   return (
     <div className='container'>
-      <AddModal
+      <EditInputModal
         onOk={handleAddModalOk}
         onCancel={handleAddModalCancel}
         title='预计完成时间'
         content=""
+        editStatus='add'
         visible={addModalVisible}
         cancleButtonExit={false}
       />
-      <AddModal
+      <EditInputModal
         onOk={handleModifyModalOk}
         onCancel={handleModifyModalCancel}
         title='修改完成时间'
         content=""
-        defaultValue={modifyInfo.modifyOldTime}
+        editStatus='modify'
+        defaultValue={modifyInfo.modifyOldTime || moment()}
         visible={modifyModalVisible}
         cancleButtonExit={false}
       />
-      <LoginModal
-        cancleButtonExit={false}
-        gotoRegister={() => setModalsStates({ ...modalState, registerModalVisible: true })}
-        title="登录"
-        loading={modalState.loginModalLoading}
-        visible={modalState.loginModalVisible}
-        content=''
-        onOk={login}
-        onCancel={() => handleLoginCancel()} />
-      <RegisterModal
-        cancleButtonExit={false}
-        goback={() => setModalsStates({ ...modalState, registerModalVisible: false })}
-        title="注册"
-        loading={modalState.registerModalLoading}
-        visible={modalState.registerModalVisible}
-        content=''
-        onOk={register}
-        onCancel={() => handleRegisterCancel()} />
-      {
-        accountType === ACCOUNTTYPEDISPATCHTYPE.TOURIST
-          ? <a onClick={(e) => handleJump(e)} className='user-jump jump-to-login'>还在用临时账号？点击这里注册账号数据不丢失！</a>
-          : <span onMouseLeave={() => setrUserInfoShow(false)} onMouseOver={() => setrUserInfoShow(true)} className='user-jump see-all'>
-            欢迎您,
-            {userInfo.nickname}
-            <ul className={`settings ${userInfoShow ? 'settings-dropdown' : ''}`}>
-              <li>
-                <a onClick={() => jumpToSettings()}>我的</a>
-              </li>
-              <li>
-                <a onClick={() => quit()}>退出</a>
-              </li>
-            </ul>
-          </span>
-      }
       <div className='content'>
         <header className='header'>
           <h1>todos</h1>
           <div className='input-container'>
-            <input ref={contentInputRef} className='myInput greenInput' type="text" placeholder='请输入' />
+            <input maxLength={25} ref={contentInputRef} className='todoitem-input green-input' type="text" placeholder='请输入' />
             <i>回车/Enter</i>
           </div>
-
         </header>
         <ul>
           {renderTodos(todoList)}

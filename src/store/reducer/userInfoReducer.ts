@@ -1,6 +1,6 @@
-import { User } from '@/pages/Index/App';
+import { User } from '@/service/api';
 
-const user: User = {
+const initialUser: User = {
     'nickname': '',
     'id': -1,
     'email': '',
@@ -12,12 +12,21 @@ const user: User = {
 
 export enum UserDispatchType {
     LOGIN,
+    QUIT,
+    MODIFYUSER,
+    MODIFYUSERTODO,
 }
 
-export const userInfo = (state = user, action: { type: UserDispatchType, payload: User }) => {
+export const userInfo = (state = initialUser, action: { type: UserDispatchType, payload: User }) => {
     switch (action.type) {
         case UserDispatchType.LOGIN:
             return { ...state, ...action.payload };
+        case UserDispatchType.QUIT:
+            return { ...initialUser };
+        case UserDispatchType.MODIFYUSER:
+            return { ...state, ...action.payload };
+        case UserDispatchType.MODIFYUSERTODO:
+            return { ...initialUser, todo_list: action.payload };
         default:
             return state;
     }

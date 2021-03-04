@@ -1,12 +1,11 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable prefer-promise-reject-errors */
 /* eslint-disable react/prop-types */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import moment, { Moment } from 'moment';
-import { Modal, Form, Input, DatePicker, ConfigProvider } from 'antd';
+import { Modal, DatePicker, ConfigProvider } from 'antd';
 import zhCN from 'antd/lib/locale/zh_CN';
-import * as api from '@/service/api';
-import './addModal.less';
+import './editModal.less';
 
 type Props = {
   visible?: boolean,
@@ -16,23 +15,23 @@ type Props = {
   title?: string;
   defaultValue?: Moment;
   content: string;
+  editStatus: 'add' | 'modify',
   loading?: boolean;
   cancleButtonExit: boolean;
 }
 
-const AddModal: React.FC<Props> = ({
+const EditInputModal: React.FC<Props> = ({
   visible,
   onOk,
   onCancel,
   title,
-  content,
   loading,
   defaultValue,
+  editStatus,
   cancleButtonExit,
 }) => {
   const [selectedTime, setSelectedTime] = useState<Moment | null>(null);
-  function handleOk() {
-    console.log('selectedTime', selectedTime?.format('YYYY-MM-DD HH:mm:ss'));
+  function handleOk(selectedTime: Moment | null) {
     onOk && onOk(selectedTime);
   }
   function handleCancel() {
@@ -41,11 +40,18 @@ const AddModal: React.FC<Props> = ({
   }
 
   function handleDatePickChange(date: Moment | null, dateString: string) {
+    console.log(date);
     setSelectedTime(date);
+    setTimeout(() => {
+      onOk(date);
+    }, 300);
   }
-  function handleDatePickOk() {
-    console.log('时间选择完成');
-  }
+
+  // function handleDatePickOk() {
+  //   setTimeout(() => {
+  //     handleOk(selectedTime);
+  //   }, 200);
+  // }
 
   function range(start: any, end: any) {
     const result = [];
@@ -67,12 +73,13 @@ const AddModal: React.FC<Props> = ({
       disabledMinutes: () => range(0, 24).splice(0, moment().minutes()),
     };
   }
+
   return (
     <Modal
       title={title && title}
       className={`add-modal ${!cancleButtonExit ? 'cancle-button-exit' : ''}`}
       onCancel={() => handleCancel()}
-      onOk={() => handleOk()}
+      onOk={() => handleOk(selectedTime)}
       okText='确定'
       width='196px'
       confirmLoading={loading}
@@ -82,12 +89,12 @@ const AddModal: React.FC<Props> = ({
           disabledDate={disabledDate}
           showTime
           format='MM/DD HH:mm'
-          defaultValue={defaultValue}
+          defaultValue={editStatus === 'modify' ? (defaultValue || undefined) : undefined}
           onChange={handleDatePickChange}
-          onOk={handleDatePickOk} />
+        />
       </ConfigProvider>
     </Modal>
   );
 };
 
-export default AddModal;
+export default EditInputModal;

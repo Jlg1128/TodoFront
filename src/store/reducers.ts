@@ -3,6 +3,6 @@ import { account } from './reducer/accountTypeReducer';
 
 const Reducers = {
     userInfo,
-    accountType: account,
+    account,
 };
 export default Reducers;

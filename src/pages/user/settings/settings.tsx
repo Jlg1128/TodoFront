@@ -1,19 +1,15 @@
 /* eslint-disable prefer-promise-reject-errors */
-import React, { Dispatch, useEffect, useState } from 'react';
+import React, { Dispatch } from 'react';
 import * as api from '@/service/api';
 import { connect } from 'react-redux';
-import { Modal, Form, Input, Select, Button, message } from 'antd';
+import { Form, Input, Button, message } from 'antd';
 import logo1 from '@/assets/logo1.png';
 import './settings.less';
-import { User } from '@/pages/Index/App';
-import { UserDispatchType, userInfo } from '@/store/reducer/userInfoReducer';
+import { User } from '@/service/api';
+import { UserDispatchType } from '@/store/reducer/userInfoReducer';
 import { AnyAction } from 'redux';
 import { ACCOUNTTYPEDISPATCHTYPE } from '@/store/reducer/accountTypeReducer';
 import { History } from 'history';
-
-const { TextArea } = Input;
-
-type ValidateRepeatType = 'user_name' | 'user_phone' | 'user_mail';
 
 type Props = {
   userInfo: User,
@@ -169,7 +165,7 @@ const Settings: React.FC<Props> = (
             ]}
           >
             <Input placeholder="请输入邮箱地址" maxLength={30} />
-            <img src={logo1} alt="" />
+            {/* <img src={logo1} alt="" /> */}
           </Form.Item>
         </Form>
         <Button className='form-button' type='primary' style={{ marginRight: 10 }} onClick={() => handleOk()}>更改</Button>

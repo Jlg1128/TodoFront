@@ -1,5 +1,5 @@
 import App from '@/pages/Index/App';
-import SecureLayout from '@/layout/secureLayout';
+import SecureLayout from '@/layout/layout';
 import Settings from '@/pages/user/settings/settings';
 
 export interface RouterConfigType {
