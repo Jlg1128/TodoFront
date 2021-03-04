@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable prefer-promise-reject-errors */
 import React, { Dispatch } from 'react';
 import * as api from '@/service/api';
@@ -37,8 +38,8 @@ const Settings: React.FC<Props> = (
   };
 
   const layout = {
-    labelCol: { span: 10, offset: -10 },
-    wrapperCol: { span: 14 },
+    labelCol: { span: 5, offset: -10 },
+    wrapperCol: { span: 10 },
   };
   const onFinish = async (values: FormValueType) => {
     // eslint-disable-next-line max-len
@@ -168,7 +169,10 @@ const Settings: React.FC<Props> = (
             {/* <img src={logo1} alt="" /> */}
           </Form.Item>
         </Form>
-        <Button className='form-button' type='primary' style={{ marginRight: 10 }} onClick={() => handleOk()}>更改</Button>
+        <div className='form-button-container'>
+          <Button className='form-button' type='default' style={{ marginRight: 10 }} onClick={() => history.push('/')}>返回</Button>
+          <Button className='form-button' type='primary' style={{ marginRight: 10 }} onClick={() => handleOk()}>更改</Button>
+        </div>
       </div>
     </div>
   );

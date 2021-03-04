@@ -70,28 +70,6 @@ const App: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    if (localStorage.getItem('userInfo') !== null
-    ) {
-      let user: User = JSON.parse(localStorage.getItem('userInfo') || '{}');
-      if (user.nickname && user.id) {
-        dispatch({
-          type: UserDispatchType.LOGIN,
-          payload: user,
-        });
-        dispatch({
-          type: ACCOUNTTYPEDISPATCHTYPE.MEMBER,
-        });
-      }
-      localStorage.setItem("accountType", JSON.stringify(ACCOUNTTYPEDISPATCHTYPE.MEMBER));
-    } else {
-      localStorage.setItem("accountType", JSON.stringify(ACCOUNTTYPEDISPATCHTYPE.TOURIST));
-    }
-    if (localStorage.getItem('todoList')
-      && Array.isArray(JSON.parse(localStorage.getItem('todoList') || '[]'))
-      && JSON.parse(localStorage.getItem('todoList') || '[]').length !== 0
-    ) {
-      setTodoList(JSON.parse(localStorage.getItem('todoList') || '[]'));
-    }
     // 监听回车
     // @ts-ignore
     window.addEventListener('keydown', (event) => handleEnterClick(JSON.parse(localStorage.getItem("accountType")), event, contentInputRef.current ? contentInputRef.current.value : ''));

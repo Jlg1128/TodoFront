@@ -6796,7 +6796,7 @@
     "rc-trigger" "^5.0.4"
     "rc-util" "^5.0.1"
 
-"rc-menu@^8.0.1", "rc-menu@^8.6.1", "rc-menu@~8.10.0":
+"rc-menu@^8.0.1", "rc-menu@^8.10.0", "rc-menu@^8.6.1", "rc-menu@~8.10.0":
   "integrity" "sha512-mafcLoKtVlH9HDW52NmwenQ9vjvgxtR46NfYAexJEIUTZ9Ze2veZUkEKjhOJlzrUHEYtCoNslpqyy4iVN08Glw=="
   "resolved" "https://registry.npmjs.org/rc-menu/-/rc-menu-8.10.0.tgz"
   "version" "8.10.0"

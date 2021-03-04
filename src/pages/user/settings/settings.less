@@ -1,19 +1,25 @@
 .settings-container {
   width: 100vw;
-  height: 100vh;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media screen and (max-width: 640px) {
+    height: 30vh;
+    margin-top: 20vh;
+  }
 
   .settings-content {
     display: flex;
     align-items: flex-end;
     flex-direction: column;
-
+    margin-top: 22vh;
   }
 
   .settings-form {
     transform: translateY(-50px);
+
   }
 
   .form-button {
@@ -24,5 +30,30 @@
   .ant-form-item {
     width: 400px;
   }
+
+  .form-button-container {
+    display: flex;
+    flex-direction: row;
+  }
+  @media screen and (max-width: 640px) {
+    width: 80%;
+
+    .settings-form {
+      .ant-form-item-label {
+        padding: 0;
+      }
+    }
+
+    .form-button {}
+
+    .ant-form-item {
+      width: 90vw;
+      margin-bottom: 8px;
+    }
+    .ant-form-item:last-child {
+      margin-bottom: 14px;
+    }
+  }
+
 
 }

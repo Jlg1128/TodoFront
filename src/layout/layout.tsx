@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/mouse-events-have-key-events */
 /* eslint-disable max-len */
 import React, { Dispatch, ReactNode, useEffect, useState } from 'react';
@@ -11,6 +12,9 @@ import * as api from '@/service/api';
 import { History } from 'history';
 import { AnyAction } from 'redux';
 import { User } from '@/service/api';
+import dropdownLogo from '@/assets/dropdownicon.png';
+import defaultAvatar from '@/assets/defaultAvatar.jpg';
+import Menu, { SubMenu, MenuItem } from 'rc-menu';
 import './layout.less';
 
 type Props = {
@@ -35,6 +39,7 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
     registerModalLoading: false,
   });
 
+  const [isDropdonw, setIsDropdown] = useState<boolean>(false);
   // 权限校对
   useEffect(() => {
     if (authPath.includes(history.location.pathname)) {
@@ -66,7 +71,7 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
         }
       }
     }
-  }, []);
+  }, [dispatch, history]);
 
   function handleJump(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
     e.stopPropagation();
@@ -176,7 +181,7 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
     });
     return flag;
   }
-  return <div className='layout'>
+  return <div onClick={() => isDropdonw && setIsDropdown(false)} className='layout'>
     <LoginModal
       cancleButtonExit={false}
       gotoRegister={() => setModalsStates({ ...modalState, registerModalVisible: true })}
@@ -195,23 +200,60 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
       content=''
       onOk={register}
       onCancel={() => handleRegisterCancel()} />
-    <div className='layout-header'>
-      {
-        accountType === ACCOUNTTYPEDISPATCHTYPE.TOURIST
-          ? <a onClick={(e) => handleJump(e)} className='user-jump jump-to-login'>还在用临时账号？点击这里注册账号数据不丢失！</a>
-          : <span onMouseLeave={() => setrUserInfoShow(false)} onMouseOver={() => setrUserInfoShow(true)} className='user-jump see-all'>
-            欢迎您,
-            {userInfo.nickname}
-            <ul className={`settings ${userInfoShow ? 'settings-dropdown' : ''}`}>
-              <li>
-                <a onClick={() => jumpToSettings()}>我的</a>
-              </li>
-              <li>
-                <a onClick={() => quit()}>退出</a>
-              </li>
-            </ul>
-          </span>
-      }
+    <div className='layout-header layout-header-h5header'>
+      <div className='layout-header-pccontainer'>
+        {
+          accountType === ACCOUNTTYPEDISPATCHTYPE.TOURIST
+            ? <a onClick={(e) => handleJump(e)} className='user-jump jump-to-login'>还在用临时账号？点击这里注册账号数据不丢失！</a>
+            : <span onMouseLeave={() => setrUserInfoShow(false)} onMouseOver={() => setrUserInfoShow(true)} className='user-jump see-all'>
+              欢迎您,
+              {userInfo.nickname}
+              <ul className={`settings ${userInfoShow ? 'settings-dropdown' : ''}`}>
+                <li>
+                  <a onClick={() => jumpToSettings()}>我的</a>
+                </li>
+                {history.location.pathname !== '/'
+                  && <li onClick={() => history.push("/")}>首页</li>
+                }
+                <li>
+                  <a onClick={() => quit()}>退出</a>
+                </li>
+              </ul>
+            </span>
+        }
+      </div>
+      <div className='layout-header-h5container'>
+        <div onClick={() => setIsDropdown(!isDropdonw)} className='h5header-imgwrap'>
+          <img src={dropdownLogo} alt="" />
+        </div>
+        <span onClick={(e) => e.stopPropagation()} className={`h5header-mask ${isDropdonw ? 'h5header-mask-show' : ''}`}>
+          {
+            accountType === ACCOUNTTYPEDISPATCHTYPE.TOURIST
+              ? <ul>
+                <li>
+                  注册
+                </li>
+              </ul>
+              : <ul>
+                <li onClick={() => jumpToSettings()} className='h5header-avatar'>
+                  <img src={(userInfo && userInfo.avatar) ? userInfo.avatar : defaultAvatar} alt="" />
+                </li>
+                <li className='h5header-nickname'>
+                  {
+                    userInfo.nickname || '你好游客123'
+                  }
+                </li>
+                {history.location.pathname !== '/'
+                  && <li onClick={() => history.push("/")}>首页</li>
+                }
+                <li onClick={() => jumpToSettings()}>我的</li>
+                {/* <li>设置</li> */}
+                <li onClick={() => quit()}>退出</li>
+              </ul>
+          }
+        </span>
+      </div>
+
       {/* layout Content */}
     </div>
     <div className='layout-body'>
