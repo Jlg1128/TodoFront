@@ -2,5 +2,16 @@
   "presets": [
     "@babel/preset-env",
     "@babel/preset-react"
+  ],
+  // Antd 打包体积过大问题
+  "plugins": [
+    [
+      "import",
+      {
+        "libraryName": "antd",
+        "libraryDirectory": "es",
+        "style": true // `style: true` 会加载 less 文件
+      }
+    ]
   ]
 }

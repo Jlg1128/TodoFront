@@ -176,6 +176,8 @@ export function updateTodoListById(id: number, todoList: TodoItem[]): Promise<Re
       method: api.updateTodoList.method,
     }).then((res: AxiosResponse<ResponseDataType>) => {
       resolve(res.data);
+    }).catch((err) => {
+      reject(err);
     });
   });
 }

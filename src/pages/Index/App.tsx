@@ -7,11 +7,11 @@ import EditInputModal from '@/pages/Index/components/editModal/editModal';
 import * as api from '@/service/api';
 import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
-import { UserDispatchType, userInfo } from '@/store/reducer/userInfoReducer';
+import { UserDispatchType } from '@/store/reducer/userInfoReducer';
 import { ACCOUNTTYPEDISPATCHTYPE } from '@/store/reducer/accountTypeReducer';
 import './App.less';
 import moment, { Moment } from 'moment';
-import { message } from 'antd';
+import { message, Tooltip } from 'antd';
 
 // 查看todo，一种是全部，一种是完成的
 enum TODOMODE {
@@ -51,6 +51,7 @@ const App: React.FC<Props> = ({
   // 查看todo的模式
   const [mode, setLookMode] = useState<TODOMODE>(TODOMODE.AllTODO);
   const contentInputRef = useRef<HTMLInputElement>(null);
+  const [isInputStatus, setInputStatus] = useState<boolean>(false);
   // 处于编辑状态的todo索引
   const [editIndex, setEditIndex] = useState<number>(-1);
   const [editVal, setEditVal] = useState<string>('');
@@ -168,12 +169,14 @@ const App: React.FC<Props> = ({
           <i onClick={() => { handleEditOnBlur(todoItem.id, editVal); }}>✓</i>
         </div>
           : <span className='todoitem-container todoitem-unselected-container'>
-            <label className='todoitem-label' htmlFor='todoitem' onClick={() => handleEditStatusToggel(todoItem.id)}>
-              {mode === TODOMODE.COMPELETED || todoItem.isCompleted === true ? <del>{todoItem.content}</del> : todoItem.content || "无内容"}
-            </label>
+            <Tooltip color='white' title={todoItem.content.length > 15 ? todoItem.content : ''}>
+              <label className='todoitem-label' htmlFor='todoitem' onClick={() => handleEditStatusToggel(todoItem.id)}>
+                {mode === TODOMODE.COMPELETED || todoItem.isCompleted === true ? <del>{todoItem.content}</del> : todoItem.content || "无内容"}
+              </label>
+            </Tooltip>
             <i className={`todoitem-modifydate ${todoItem.isCompleted ? 'todoitem-compeleted-item' : ''}`}>
               {mode === TODOMODE.COMPELETED || todoItem.isCompleted === true ? <span>完成时间:</span> : <span>目标时间:</span>}
-              <a onClick={() => { !todoItem.isCompleted && handleModifyComelteTodo(todoItem.id, timestamp ? moment(timestamp) : moment()); }}>
+              <a onClick={() => { !todoItem.isCompleted && handleModifyCompelteTodo(todoItem.id, timestamp ? moment(timestamp) : moment()); }}>
                 {processedTime}
               </a>
             </i>
@@ -198,6 +201,7 @@ const App: React.FC<Props> = ({
     localStorage.setItem('todoList', JSON.stringify(todoList));
   }, [todoList]);
 
+  // 是否选中全部
   useEffect(() => {
     let myTodoList = todoList;
     if (mode === TODOMODE.COMPELETED) {
@@ -211,24 +215,31 @@ const App: React.FC<Props> = ({
   }, [selectedIndex]);
 
   async function updateTodoList(accountType: ACCOUNTTYPEDISPATCHTYPE, newTodoList: TodoItem[], type: ModifyType) {
-    let wrong = true;
+    let hasError = false;
     if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER) {
-      await api.updateTodoListById(userInfo.id, newTodoList);
-      let res = await api.getTodoListById(userInfo.id);
-      if (res.data) {
-        newTodoList = res.data;
-      } else {
-        wrong = false;
+      try {
+        await api.updateTodoListById(userInfo.id, newTodoList);
+        let res = await api.getTodoListById(userInfo.id);
+        if (res.data) {
+          newTodoList = res.data;
+        } else {
+          hasError = false;
+        }
+      } catch (error) {
+        hasError = true;
+        message.error(`异常错误，${type}失败`);
       }
     }
-    localStorage.setItem('todoList', JSON.stringify(newTodoList));
-    setTodoList(newTodoList);
-    if (wrong) {
-      type !== ModifyType.FINISH && message.success(`${type}成功`);
-      return;
+    if (!hasError) {
+      localStorage.setItem('todoList', JSON.stringify(newTodoList));
+      setTodoList(newTodoList);
+      setInputStatus(false);
+      if (!hasError) {
+        type !== ModifyType.FINISH && message.success(`${type}成功`);
+      }
     }
-    message.success(`${type}失败`);
   }
+
   function deleteTodo(ids: number[]) {
     updateTodoList(accountType, [...todoList.filter((item, index) => !ids.includes(item.id))], ModifyType.DELETE);
     setSelectedIndex([...selectedIndex.filter((item, index) => !ids.includes(item))]);
@@ -276,11 +287,12 @@ const App: React.FC<Props> = ({
     }
     setAddModalVisible(false);
   }
+
   function handleAddModalCancel() {
     setAddModalVisible(false);
   }
 
-  function handleModifyComelteTodo(id: number, targetCompleteTime: Moment) {
+  function handleModifyCompelteTodo(id: number, targetCompleteTime: Moment) {
     setModifyInfo(
       {
         modifyIndex: id, modifyOldTime: targetCompleteTime,
@@ -304,6 +316,7 @@ const App: React.FC<Props> = ({
   function handleModifyModalCancel() {
     setModifyModalVisible(false);
   }
+
   return (
     <div className='container'>
       <EditInputModal
@@ -329,8 +342,8 @@ const App: React.FC<Props> = ({
         <header className='header'>
           <h1>todos</h1>
           <div className='input-container'>
-            <input maxLength={25} ref={contentInputRef} className='todoitem-input green-input' type="text" placeholder='请输入' />
-            <i>回车/Enter</i>
+            <input onChange={() => !isInputStatus && setInputStatus(true)} ref={contentInputRef} className='todoitem-input green-input' type="text" placeholder='请输入' />
+            <i style={{ display: contentInputRef.current?.value ? 'none' : 'inline' }}>回车/Enter</i>
           </div>
         </header>
         <ul>

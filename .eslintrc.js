@@ -32,7 +32,7 @@ module.exports = {
   rules: {
     'camelcase': 'off',
     'import/no-absolute-path': 0,
-    'import/no-extraneous-dependencies': 1,
+    'import/no-extraneous-dependencies': 0,
     'react/jsx-closing-tag-location': 0,
     'no-underscore-dangle': 0,
     'label-has-associated-control': 0,
@@ -40,7 +40,7 @@ module.exports = {
     'prefer-const': 0,
     "jsx-a11y/label-has-for": [2, {
       "required": {
-          "some": ["nesting", "id"],
+        "some": ["nesting", "id"],
       },
     }],
     semi: [2, 'always'],

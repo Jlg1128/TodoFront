@@ -43,7 +43,7 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
   // 权限校对
   useEffect(() => {
     if (authPath.includes(history.location.pathname)) {
-      if (JSON.parse(localStorage.getItem("accountType") || '') === ACCOUNTTYPEDISPATCHTYPE.TOURIST
+      if (JSON.parse(localStorage.getItem("accountType") || JSON.stringify("tourist")) === ACCOUNTTYPEDISPATCHTYPE.TOURIST
         || Object.keys(JSON.parse(localStorage.getItem("userInfo") || "{}")).length === 0
         || !JSON.parse(localStorage.getItem("userInfo") || "{}").id
         || !JSON.parse(localStorage.getItem("userInfo") || "{}").nickname
@@ -132,6 +132,9 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
       type: ACCOUNTTYPEDISPATCHTYPE.TOURIST,
     });
     message.success("退出成功");
+    setTimeout(() => {
+      history.location.pathname !== '/' && history.replace('/');
+    }, 1500);
   }
   function handleLoginCancel() {
     setModalsStates({
@@ -230,7 +233,10 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
           {
             accountType === ACCOUNTTYPEDISPATCHTYPE.TOURIST
               ? <ul>
-                <li>
+                <li onClick={() => setModalsStates({ ...modalState, loginModalVisible: true })}>
+                  登录
+                </li>
+                <li onClick={() => setModalsStates({ ...modalState, registerModalVisible: true })}>
                   注册
                 </li>
               </ul>

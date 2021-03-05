@@ -48,7 +48,7 @@ const LoginModal: React.FC<Props> = ({
       className={`login-modal ${!cancleButtonExit ? 'cancle-button-exit' : ''}`}
       onCancel={() => handleCancel()}
       onOk={() => handleOk()}
-      width='30%'
+      width={document.body.clientWidth < 640 ? '80%' : '30%'}
       okText='登录'
       confirmLoading={loading}
       visible={visible}>
