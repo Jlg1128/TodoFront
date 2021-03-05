@@ -190,11 +190,11 @@
 	}
 
 	ul {
-		width: 100%;
+		width: 80%;
 		margin: 5px auto;
 		text-align: center;
 		max-height: 50vh;
-		overflow-y: scroll;
+		overflow-y: overlay;
 		li {
 			padding-left: 10px;
 			border-bottom: 1px solid rgba(102, 102, 102, 0.3);
@@ -203,7 +203,7 @@
 			display: inline-block;
 			font-size: 25px;
 			color: #777;
-			width: 80%;
+			width: 100%;
 			padding: 2px;
 			font-weight: 300;
 			transition: background-color 0.3s;
@@ -236,6 +236,7 @@
 		}
 
 		@media screen and (max-width: 640px) {
+			width: 100%;
 			li {
 
 				width: 90%;

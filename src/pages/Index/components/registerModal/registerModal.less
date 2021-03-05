@@ -1,8 +1,14 @@
 @import '../../../../styles/index.less';
+
 .register-modal {
+  &.ant-modal {
+    top: 20%;
+  }
+
   .ant-modal-body {
     padding-bottom: 10px;
   }
+
   .register {
     color: @textColor;
     font-size: 10px;
@@ -11,10 +17,12 @@
   .ant-input {
     height: 40px;
   }
+
   .form-item-nomargin {
     margin-bottom: 10px;
   }
 }
+
 .cancle-button-exit {
   .ant-modal-footer {
     button:first-child {

@@ -1,7 +1,8 @@
 /* eslint-disable prefer-promise-reject-errors */
 /* eslint-disable react/prop-types */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Modal, Form, Input } from 'antd';
+import { getModalWidth } from '@/utils/index';
 import * as api from '@/service/api';
 import './registerModal.less';
 
@@ -48,7 +49,7 @@ const LoginModal: React.FC<Props> = ({
       className={`register-modal ${!cancleButtonExit ? 'cancle-button-exit' : ''}`}
       onCancel={() => handleCancel()}
       onOk={() => handleOk()}
-      width={document.body.clientWidth < 640 ? '80%' : '30%'}
+      width={getModalWidth(document.body.clientWidth)}
       okText='注册'
       confirmLoading={loading}
       visible={visible}>

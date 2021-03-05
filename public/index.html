@@ -30,7 +30,10 @@
 
     </div>
     <script>
-        window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject = function () {}
+        if ( window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+            window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = function() {
+            }
+        }
     </script>
 </body>
 </html>

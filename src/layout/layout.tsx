@@ -120,6 +120,9 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
         );
         flag = false;
       }
+    })
+    .catch((err) => {
+      message.error('网路异常');
     });
     return flag;
   }
@@ -181,7 +184,7 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
         );
         flag = true;
       }
-    });
+    }).catch((err) => message.error("网络异常"));
     return flag;
   }
   return <div onClick={() => isDropdonw && setIsDropdown(false)} className='layout'>
