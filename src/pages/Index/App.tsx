@@ -349,7 +349,6 @@ const App: React.FC<Props> = ({
               type="text"
               placeholder='请输入' />
             <i className='todoitem-input-item-enter pc' style={{ display: contentInputRef.current?.value ? 'none' : 'inline' }}>回车/Enter</i>
-            <img src="todoitem-input-item-enter h5" alt="" />
           </div>
         </header>
         <ul>
