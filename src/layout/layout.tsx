@@ -39,9 +39,6 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
     registerModalLoading: false,
   });
 
-  useEffect(() => {
-    console.log('kajshdkashd');
-  })
   const [isDropdonw, setIsDropdown] = useState<boolean>(false);
   // 权限校对
   useEffect(() => {
