@@ -1,7 +1,7 @@
 /* eslint-disable prefer-promise-reject-errors */
 /* eslint-disable react/prop-types */
 import React from 'react';
-import { Modal, Form, Input } from 'antd';
+import { Modal, Form, Input, message } from 'antd';
 import * as api from '@/service/api';
 import { getModalWidth } from '@/utils/index';
 import './loginModal.less';
@@ -73,12 +73,18 @@ const LoginModal: React.FC<Props> = ({
                   return Promise.reject('用户名不能超过20个字符');
                 }
                 if (/^[\u4e00-\u9fa50-9A-Za-z_]+$/g.test(value)) {
-                  let res = await api.getUserByIdOrNickName({ nickname: form.getFieldValue('username') });
-                  if (res && res.success) {
-                    if (!res.data) {
-                      return Promise.reject('用户名不存在');
+                  try {
+                    let res = await api.getUserByIdOrNickName({ nickname: form.getFieldValue('username') });
+                    if (res && res.success) {
+                      if (!res.data) {
+                        return Promise.reject('用户名不存在');
+                      }
+                      return Promise.resolve();
                     }
-                    return Promise.resolve();
+                  } catch (error) {
+                    console.log(error);
+                    message.error("网络错误");
+                    return;
                   }
                 }
                 return Promise.reject('仅支持中文、数字、英文大小写、下划线。');

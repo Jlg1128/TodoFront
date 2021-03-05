@@ -96,7 +96,8 @@ export function login(nickname: string, password: string): Promise<ResponseDataT
       },
     }).then((res) => {
       resolve(res.data);
-    });
+    })
+    .catch((err) => reject(err));
   });
 }
 
@@ -109,7 +110,8 @@ export function quit(id: string): Promise<ResponseDataType> {
       },
     }).then((res) => {
       resolve(res.data);
-    });
+    })
+    .catch((err) => reject(err));
   });
 }
 
@@ -122,7 +124,8 @@ export function register(user?: User): Promise<ResponseDataType<User>> {
       method: api.register.method,
     }).then((res: AxiosResponse<ResponseDataType<User>>) => {
       resolve(res.data);
-    });
+    })
+    .catch((err) => reject(err));
   });
 }
 
@@ -135,7 +138,8 @@ export function getUserByIdOrNickName(param: { id?: number, nickname?: string })
       },
       method: api.getUserByIdOrNickName.method,
     })
-      .then((res: AxiosResponse<ResponseDataType<User>>) => resolve(res.data));
+      .then((res: AxiosResponse<ResponseDataType<User>>) => resolve(res.data))
+      .catch((err) => reject(err));
   });
 }
 
@@ -149,7 +153,8 @@ export function getTodoListById(id: number): Promise<ResponseDataType<TodoItem[]
     })
       .then((res: AxiosResponse<ResponseDataType<TodoItem[]>>) => {
         resolve(res.data);
-      });
+      })
+      .catch((err) => reject(err));
   });
 }
 
@@ -162,7 +167,8 @@ export function getTodoListNickname(nickname: string): Promise<ResponseDataType<
       },
     }).then((res: AxiosResponse<ResponseDataType<TodoItem[]>>) => {
       resolve(res.data);
-    });
+    })
+      .catch((err) => reject(err));
   });
 }
 
@@ -190,7 +196,7 @@ export function ifRepeat(value: string, type: RepeatType): Promise<ResponseDataT
         type,
       },
       method: api.ifRepeat.method,
-    }).then((res: AxiosResponse<ResponseDataType>) => resolve(res.data));
+    }).then((res: AxiosResponse<ResponseDataType>) => resolve(res.data)).catch((err) => reject(err));
   });
 }
 
@@ -201,7 +207,7 @@ export function modifyUser(user: User): Promise<ResponseDataType> {
         ...user,
       },
       method: api.modifyUser.method,
-    }).then((res: AxiosResponse<ResponseDataType>) => resolve(res.data));
+    }).then((res: AxiosResponse<ResponseDataType>) => resolve(res.data)).catch((err) => reject(err));
   });
 }
 
@@ -213,6 +219,6 @@ export function modifyAvatar(id: number, avatar: string): Promise<ResponseDataTy
         avatar,
       },
       method: api.modifyAvatar.method,
-    }).then((res: AxiosResponse<ResponseDataType>) => resolve(res.data));
+    }).then((res: AxiosResponse<ResponseDataType>) => resolve(res.data)).catch((err) => reject(err));
   });
 }

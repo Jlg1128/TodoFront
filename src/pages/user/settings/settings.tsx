@@ -45,10 +45,10 @@ const Settings: React.FC<Props> = (
     // eslint-disable-next-line max-len
     let res = await api.modifyUser({ ...userInfo, nickname: values.username, email: values.email, phone_number: values.phone });
     if (res && res.success) {
-      message.success("修改成功，1秒后跳转到首页");
-      setTimeout(() => {
-        history.push('/');
-      }, 1500);
+      message.success("修改成功");
+      // setTimeout(() => {
+      //   history.push('/');
+      // }, 1500);
       let user = await api.getUserByIdOrNickName({ id: JSON.parse(localStorage.getItem("userInfo") || '{}').id });
       if (user && user.success === true && user.data != null && user.data.nickname) {
         localStorage.setItem('userInfo', JSON.stringify(user.data));
@@ -61,6 +61,7 @@ const Settings: React.FC<Props> = (
         dispatch({
           type: ACCOUNTTYPEDISPATCHTYPE.MEMBER,
         });
+        form.resetFields();
       } else {
         message.error(res && res.msg);
       }
@@ -83,6 +84,7 @@ const Settings: React.FC<Props> = (
           wrapperCol={{ span: 100 }}
           form={form}
           initialValues={initialValues}
+          validateTrigger="onBlur"
           onFinish={onFinish}
         >
           <Form.Item
@@ -101,11 +103,16 @@ const Settings: React.FC<Props> = (
                     if (value === initialValues.username) {
                       return Promise.resolve();
                     }
-                    let res = await api.ifRepeat(value, api.RepeatType.USERNAME);
-                    if (res && !res.success) {
-                      return Promise.reject(res.msg);
+                    try {
+                      let res = await api.ifRepeat(value, api.RepeatType.USERNAME);
+                      if (res && !res.success) {
+                        return Promise.reject(res.msg);
+                      }
+                      return Promise.resolve();
+                    } catch (error) {
+                      message.error("网络错误");
+                      return;
                     }
-                    return Promise.resolve();
                   }
                   return Promise.reject('仅支持中文、数字、英文大小写、下划线。');
                 }
@@ -128,11 +135,16 @@ const Settings: React.FC<Props> = (
                   if (value === initialValues.phone) {
                     return Promise.resolve();
                   }
-                  let res = await api.ifRepeat(value, api.RepeatType.PHONE);
-                  if (res && !res.success) {
-                    return Promise.reject(res.msg);
+                  try {
+                    let res = await api.ifRepeat(value, api.RepeatType.PHONE);
+                    if (res && !res.success) {
+                      return Promise.reject(res.msg);
+                    }
+                    return Promise.resolve();
+                  } catch (error) {
+                    message.error("网络错误");
+                    return;
                   }
-                  return Promise.resolve();
                 }
                 return Promise.resolve();
               },
@@ -147,16 +159,21 @@ const Settings: React.FC<Props> = (
             rules={[{ required: true, message: "请输入邮箱" },
             ({ getFieldValue }) => ({
               async validator(rule, value) {
-                if (value && getFieldValue('mail') === value) {
+                if (value && getFieldValue('email') === value) {
                   if (/^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/.test(value)) {
                     if (value === initialValues.email) {
                       return Promise.resolve();
                     }
-                    let res = await api.ifRepeat(value, api.RepeatType.EMAIL);
-                    if (res && !res.success) {
-                      return Promise.reject(res.msg);
+                    try {
+                      let res = await api.ifRepeat(value, api.RepeatType.EMAIL);
+                      if (res && !res.success) {
+                        return Promise.reject(res.msg);
+                      }
+                      return Promise.resolve();
+                    } catch (error) {
+                      message.error("网络错误");
+                      return Promise.reject();
                     }
-                    return Promise.resolve();
                   }
                   return Promise.reject('邮箱格式错误');
                 }
