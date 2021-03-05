@@ -20,11 +20,11 @@ const webpackConfigProd = {
             append: false,
           }),
         // 打包分析
-        new BundleAnalyzerPlugin({
-            analyzerMode: 'server',
-            generateStatsFile: false,
-            statsOptions: { source: false },
-        }),
+        // new BundleAnalyzerPlugin({
+        //     analyzerMode: 'server',
+        //     generateStatsFile: false,
+        //     statsOptions: { source: false },
+        // }),
     ],
 
 };
