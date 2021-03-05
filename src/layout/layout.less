@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
+  height: 100vh;
 
   .layout-header {
     padding: 20px 0;
@@ -10,20 +10,20 @@
     position: relative;
     height: 85px;
 
-    @media screen and (max-width: 640px){
-      
-    }
+    @media screen and (max-width: 640px) {}
 
     .layout-header-pccontainer {
-      @media screen and (max-width: 641px){
+      @media screen and (max-width: 641px) {
         display: none;
       }
     }
+
     .layout-header-h5container {
-      @media screen and (min-width: 640px){
+      @media screen and (min-width: 640px) {
         display: none;
       }
     }
+
     .jump-to-login {}
 
     .user-jump {
@@ -73,6 +73,7 @@
       box-shadow: 0 0 2px 1px #666;
     }
   }
+
   .layout-body {
     display: flex;
     align-items: center;
@@ -81,10 +82,12 @@
 
   .layout-header-h5header {
     width: 100%;
-    height: 100%;
-    @media screen and (min-width: 640px){
+    height: 68px;
+
+    @media screen and (min-width: 640px) {
       height: 85px;
     }
+
     background-color: white;
     display: flex;
     align-items: center;
@@ -128,15 +131,18 @@
           color: rgba(0, 128, 0, 0.8);
           font-size: 16px;
           margin-bottom: 3px;
+
           &.h5header-avatar {
             text-align: center;
             margin-bottom: 10px;
+
             img {
               border-radius: 50%;
               width: 55px;
               height: 55px;
             }
           }
+
           &.h5header-nickname {
             font-size: 19px;
             font-weight: 400;
@@ -146,5 +152,9 @@
         }
       }
     }
+  }
+
+  .layout-footer {
+    flex-grow: 1;
   }
 }
