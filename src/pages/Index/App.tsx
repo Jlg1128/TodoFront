@@ -342,8 +342,14 @@ const App: React.FC<Props> = ({
         <header className='header'>
           <h1>todos</h1>
           <div className='input-container'>
-            <input onChange={() => !isInputStatus && setInputStatus(true)} ref={contentInputRef} className='todoitem-input green-input' type="text" placeholder='请输入' />
-            <i style={{ display: contentInputRef.current?.value ? 'none' : 'inline' }}>回车/Enter</i>
+            <input
+              onChange={() => !isInputStatus && setInputStatus(true)}
+              ref={contentInputRef}
+              className='todoitem-input green-input'
+              type="text"
+              placeholder='请输入' />
+            <i className='todoitem-input-item-enter pc' style={{ display: contentInputRef.current?.value ? 'none' : 'inline' }}>回车/Enter</i>
+            <img src="todoitem-input-item-enter h5" alt="" />
           </div>
         </header>
         <ul>

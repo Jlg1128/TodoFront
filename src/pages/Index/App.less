@@ -15,10 +15,6 @@
 		font-family: "Microsoft soft";
 		font-weight: 300;
 
-		@media screen and (max-width: 640px) {
-			font-size: 23px;
-		}
-
 		&.todoitem-edit-input {
 			height: 100%;
 			font-weight: 300;
@@ -31,6 +27,16 @@
 		&.green-input {
 			color: #666;
 		}
+
+		@media screen and (max-width: 640px) {
+			font-size: 23px;
+
+			&.green-input {
+				padding: 10px 0 10px 5px;
+			}
+		}
+
+
 	}
 
 	.content {
@@ -46,7 +52,7 @@
 		background-color: rgba(0, 128, 0, 0.4);
 
 		@media screen and (max-width: 640px) {
-			width: 94%;
+			width: 87%;
 		}
 
 		.todoitem-li {
@@ -58,6 +64,7 @@
 
 						a {
 							color: white !important;
+							font-weight: 400;
 						}
 					}
 				}
@@ -84,7 +91,7 @@
 
 						@media screen and (max-width: 640px) {
 							font-size: 10px;
-							margin: 0;
+							margin: 8px;
 							display: flex;
 							flex-direction: column;
 							align-items: center;
@@ -108,7 +115,7 @@
 						}
 
 						span:first-child {
-							font-weight: 500;
+							font-weight: 400;
 							transition: all 0.3s;
 						}
 					}
@@ -169,19 +176,41 @@
 				width: 100%;
 			}
 
-			i {
+			.todoitem-input-item-enter {
 				position: absolute;
 				top: 50%;
 				transform: translateY(-50%);
 				right: 10%;
 				color: rgba(102, 102, 102, 0.4);
-				// bottom: 3px;
+
+				i {
+					display: inline;
+				}
+
+				img {
+					display: none;
+
+				}
+
+				@media screen and (max-width:800px) {
+					i {
+						display: none;
+					}
+
+					img {
+						display: inline-block;
+					}
+				}
 			}
+
 		}
 
 		@media screen and (max-width:640px) {
+			height: 60px;
+
 			.input-container {
-				width: 90%;
+				width: 87%;
+
 				i {
 					right: 5%;
 				}
@@ -195,6 +224,7 @@
 		text-align: center;
 		max-height: 50vh;
 		overflow-y: overlay;
+
 		li {
 			padding-left: 10px;
 			border-bottom: 1px solid rgba(102, 102, 102, 0.3);
@@ -213,7 +243,7 @@
 			}
 
 			.input-container {
-				width: 90%;
+				width: 100%;
 				display: inline-block;
 				position: relative;
 
@@ -236,10 +266,11 @@
 		}
 
 		@media screen and (max-width: 640px) {
-			width: 100%;
+			width: 87%;
+
 			li {
 
-				width: 90%;
+				width: 100%;
 			}
 		}
 	}
@@ -306,7 +337,8 @@
 
 		@media screen and(max-width:640px) {
 			font-size: 14px;
-			padding: 5px 5% 5px 5%;
+			padding: 5px 6.5% 5px 6.5ç%;
+
 			span {
 				white-space: nowrap;
 			}

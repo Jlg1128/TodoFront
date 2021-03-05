@@ -40,18 +40,15 @@ const EditInputModal: React.FC<Props> = ({
   }
 
   function handleDatePickChange(date: Moment | null, dateString: string) {
-    console.log(date);
     setSelectedTime(date);
     setTimeout(() => {
       onOk(date);
     }, 300);
   }
 
-  // function handleDatePickOk() {
-  //   setTimeout(() => {
-  //     handleOk(selectedTime);
-  //   }, 200);
-  // }
+  function handleDatePickOk(date: Moment | null) {
+    setSelectedTime(date);
+  }
 
   function range(start: any, end: any) {
     const result = [];
@@ -90,7 +87,8 @@ const EditInputModal: React.FC<Props> = ({
           showTime
           format='MM/DD HH:mm'
           defaultValue={editStatus === 'modify' ? (defaultValue || undefined) : undefined}
-          onChange={handleDatePickChange}
+          // onChange={handleDatePickChange}
+          onOk={(date) => { handleDatePickOk(date); }}
         />
       </ConfigProvider>
     </Modal>
