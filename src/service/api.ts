@@ -103,12 +103,13 @@ export function login(nickname: string, password: string): Promise<ResponseDataT
 
 export function quit(id: string): Promise<ResponseDataType> {
   return new Promise((resolve, reject) => {
-    axios(api.login.url, {
+    axios(api.quit.url, {
       method: api.login.method,
       data: {
         id,
       },
     }).then((res) => {
+      console.log(res);
       resolve(res.data);
     })
     .catch((err) => reject(err));

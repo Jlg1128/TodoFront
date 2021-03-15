@@ -14,8 +14,8 @@ import { AnyAction } from 'redux';
 import { User } from '@/service/api';
 import dropdownLogo from '@/assets/dropdownicon.png';
 import defaultAvatar from '@/assets/defaultAvatar.jpg';
-import Menu, { SubMenu, MenuItem } from 'rc-menu';
 import './layout.less';
+import { TodoDispatchType } from '@/store/reducer/todoReducer';
 
 type Props = {
   userInfo: User,
@@ -59,8 +59,9 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
     if (localStorage.getItem("accountType") && JSON.parse(localStorage.getItem("accountType")) === ACCOUNTTYPEDISPATCHTYPE.MEMBER) {
       // @ts-ignore
       if (localStorage.getItem("userInfo")) {
-        let user = JSON.parse(localStorage.getItem("userInfo") || '{}');
+        let user: User = JSON.parse(localStorage.getItem("userInfo") || '{}');
         if (user.id && user.nickname) {
+          console.log(user.todo_list);
           dispatch({
             type: UserDispatchType.LOGIN,
             payload: user,
@@ -68,10 +69,14 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
           dispatch({
             type: ACCOUNTTYPEDISPATCHTYPE.MEMBER,
           });
+          dispatch({
+            type: TodoDispatchType.INIT,
+            payload: user.todo_list,
+          });
         }
       }
     }
-  }, [dispatch, history]);
+  }, []);
 
   function handleJump(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
     e.stopPropagation();
@@ -104,12 +109,17 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
         dispatch({
           type: ACCOUNTTYPEDISPATCHTYPE.MEMBER,
         });
+        dispatch({
+          type: TodoDispatchType.INIT,
+          payload: res.data.todo_list,
+        });
         message.success("登录成功");
         setModalsStates(
           {
             ...modalState, loginModalLoading: false, loginModalVisible: false,
           },
         );
+        setrUserInfoShow(false);
         flag = true;
       } else {
         message.error(res && res.msg);
@@ -121,9 +131,9 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
         flag = false;
       }
     })
-    .catch((err) => {
-      message.error('网路异常');
-    });
+      .catch((err) => {
+        message.error('网路异常');
+      });
     return flag;
   }
   function quit() {
@@ -219,7 +229,9 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
                   <a onClick={() => jumpToSettings()}>我的</a>
                 </li>
                 {history.location.pathname !== '/'
-                  && <li onClick={() => history.push("/")}>首页</li>
+                  && <li>
+                    <a onClick={() => history.push("/")}>首页</a>
+                  </li>
                 }
                 <li>
                   <a onClick={() => quit()}>退出</a>

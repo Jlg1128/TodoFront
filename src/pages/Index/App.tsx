@@ -12,6 +12,7 @@ import { ACCOUNTTYPEDISPATCHTYPE } from '@/store/reducer/accountTypeReducer';
 import './App.less';
 import moment, { Moment } from 'moment';
 import { message, Tooltip } from 'antd';
+import { TodoDispatchType } from '@/store/reducer/todoReducer';
 
 // 查看todo，一种是全部，一种是完成的
 enum TODOMODE {
@@ -25,9 +26,8 @@ type Props = {
   account: {
     accountType: ACCOUNTTYPEDISPATCHTYPE,
   };
+  todo: TodoItem[],
 }
-
-type User = api.User;
 
 type TodoItem = api.TodoItem;
 
@@ -47,6 +47,7 @@ const App: React.FC<Props> = ({
   dispatch,
   userInfo,
   account: { accountType },
+  todo,
 }) => {
   // 查看todo的模式
   const [mode, setLookMode] = useState<TODOMODE>(TODOMODE.AllTODO);
@@ -90,26 +91,38 @@ const App: React.FC<Props> = ({
   // 监听账户类型的切换改变current todolist
   useEffect(() => {
     if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER && userInfo.nickname && userInfo.id !== -1) {
-      setTodoList(userInfo.todo_list);
+      dispatch({
+        type: TodoDispatchType.INIT,
+        payload: userInfo.todo_list,
+      });
     } else {
-      setTodoList(JSON.parse(localStorage.getItem("todoList") || '[]'));
+      dispatch({
+        type: TodoDispatchType.INIT,
+        payload: JSON.parse(localStorage.getItem("todoList") || '[]'),
+      });
     }
   }, [accountType]);
 
   async function handleAdd(accountType: ACCOUNTTYPEDISPATCHTYPE, todoInputMsg: string, oldTodoList: TodoItem[], targetCompleteTime: Moment | null) {
-    const id = oldTodoList[oldTodoList.length - 1] ? oldTodoList[oldTodoList.length - 1].id + 1 : 1;
     const needAddItem: TodoItem = {
-      id,
+      id: -1,
       content: todoInputMsg,
       isCompleted: false,
       completedTime: null,
       targetCompleteTime,
       createTime: moment(),
     };
-
-    // @ts-ignore
-    let newTodoList: TodoItem[] = oldTodoList ? [...oldTodoList, needAddItem] : [needAddItem];
-    updateTodoList(accountType, newTodoList, ModifyType.ADD);
+    if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER) {
+      const id = todo.length ? todo[todo.length - 1].id + 1 : 1;
+      needAddItem.id = id;
+      updateTodoList(accountType, [...todo, needAddItem], ModifyType.ADD);
+    } else {
+      dispatch({
+        type: TodoDispatchType.ADD,
+        payload: needAddItem,
+      });
+      message.success("添加成功");
+    }
   }
 
   function handleCheckBoxChange(idx: number, ifSelected: boolean) {
@@ -127,13 +140,26 @@ const App: React.FC<Props> = ({
   }
 
   function handleEditOnBlur(id: number, content: string) {
-    let newTodoList = [...todoList.map((item, index) => {
-      if (item.id === id) {
-        item.content = content;
-      }
-      return item;
-    })];
-    updateTodoList(accountType, newTodoList, ModifyType.UPDATE);
+    if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER) {
+      let newTodoList = [...todo.map((item, index) => {
+        if (item.id === id) {
+          if (content && item.content !== content) {
+            item.content = content;
+          }
+        }
+        return item;
+      })];
+      updateTodoList(accountType, [...newTodoList], ModifyType.UPDATE);
+    } else {
+      dispatch({
+        type: TodoDispatchType.UPDATE,
+        payload: {
+          id,
+          content,
+        },
+      });
+      message.success("修改成功");
+    }
     setEditIndex(-1);
   }
 
@@ -191,21 +217,21 @@ const App: React.FC<Props> = ({
   useEffect(() => {
     // 如果是有账户的话，每次todolist变化都需要将新的user存入localstorage
     if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER && userInfo.nickname && userInfo.id !== -1) {
-      let newUser = { ...userInfo, todo_list: todoList };
+      let newUser = { ...userInfo, todo_list: todo };
       dispatch({
         type: UserDispatchType.MODIFYUSER,
         payload: newUser,
       });
       localStorage.setItem("userInfo", JSON.stringify(newUser));
     }
-    localStorage.setItem('todoList', JSON.stringify(todoList));
-  }, [todoList]);
+    localStorage.setItem('todoList', JSON.stringify(todo));
+  }, [todo]);
 
   // 是否选中全部
   useEffect(() => {
-    let myTodoList = todoList;
+    let myTodoList = todo;
     if (mode === TODOMODE.COMPELETED) {
-      myTodoList = todoList.filter((todoItem, index) => todoItem.isCompleted !== true);
+      myTodoList = todo.filter((todoItem, index) => todoItem.isCompleted !== true);
     }
     if (selectedIndex.length && selectedIndex.length === myTodoList.length) {
       setIfSelectedAll(true);
@@ -222,6 +248,10 @@ const App: React.FC<Props> = ({
         let res = await api.getTodoListById(userInfo.id);
         if (res.data) {
           newTodoList = res.data;
+          dispatch({
+            type: TodoDispatchType.INIT,
+            payload: newTodoList,
+          });
         } else {
           hasError = false;
         }
@@ -232,7 +262,6 @@ const App: React.FC<Props> = ({
     }
     if (!hasError) {
       localStorage.setItem('todoList', JSON.stringify(newTodoList));
-      setTodoList(newTodoList);
       setInputStatus(false);
       if (!hasError) {
         type !== ModifyType.FINISH && message.success(`${type}成功`);
@@ -241,29 +270,46 @@ const App: React.FC<Props> = ({
   }
 
   function deleteTodo(ids: number[]) {
-    updateTodoList(accountType, [...todoList.filter((item, index) => !ids.includes(item.id))], ModifyType.DELETE);
+    if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER) {
+      let newTodoList = [...todo.filter((item, index) => !ids.includes(item.id))];
+      updateTodoList(accountType, newTodoList, ModifyType.DELETE);
+    } else {
+      dispatch({
+        type: TodoDispatchType.DELETE,
+        payload: ids,
+      });
+      message.success('删除成功');
+    }
+
     setSelectedIndex([...selectedIndex.filter((item, index) => !ids.includes(item))]);
   }
 
   function finishTodo(ids: number[]) {
-    // 完成todo
-    let processedTodoList = todoList.map((item, index) => {
-      if (ids.includes(item.id)) {
-        item.isCompleted = true;
-        // @ts-ignore
-        item.completedTime = moment().format('YYYY-MM-DD HH:mm:ss');
-      }
-      return item;
-    });
-    updateTodoList(accountType, [...processedTodoList], ModifyType.FINISH);
+    if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER) {
+      let newTodoList = todo.map((item, index) => {
+        if (ids.includes(item.id)) {
+          item.isCompleted = true;
+          // @ts-ignore
+          item.completedTime = moment().format('YYYY-MM-DD HH:mm:ss');
+        }
+        return item;
+      });
+      updateTodoList(accountType, newTodoList, ModifyType.FINISH);
+    } else {
+      dispatch({
+        type: TodoDispatchType.FINISH,
+        payload: ids,
+      });
+      message.success("更新成功");
+    }
   }
 
   function selectedAll(ifSelectedAll: boolean) {
     if (ifSelectedAll === true) {
-      let allId = todoList.map((todoItem) => todoItem.id);
+      let allId = todo.map((todoItem) => todoItem.id);
       setIfSelectedAll(true);
       if (mode === TODOMODE.COMPELETED) {
-        allId = todoList.filter((todoItem) => todoItem.isCompleted === true).map((item, index) => item.id);
+        allId = todo.filter((todoItem) => todoItem.isCompleted === true).map((item, index) => item.id);
       }
       setSelectedIndex(allId);
     } else {
@@ -302,13 +348,28 @@ const App: React.FC<Props> = ({
   }
 
   function handleModifyModalOk(targetCompleteTime: Moment | null) {
-    let newTodoList = [...todoList.map((item, index) => {
-      if (item.id === modifyInfo.modifyIndex) {
-        item.targetCompleteTime = targetCompleteTime;
-      }
-      return item;
-    })];
-    updateTodoList(accountType, newTodoList, ModifyType.UPDATE);
+    if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER) {
+      let newTodoList = [...todo.map((item, index) => {
+        if (item.id === modifyInfo.modifyIndex) {
+          if (targetCompleteTime && item.targetCompleteTime !== targetCompleteTime) {
+            item.targetCompleteTime = targetCompleteTime;
+          }
+        }
+        return item;
+      })];
+      updateTodoList(accountType, [...newTodoList], ModifyType.UPDATE);
+    } else {
+      dispatch({
+        type: TodoDispatchType.UPDATE,
+        payload: {
+          id: modifyInfo.modifyIndex,
+          updateTime: targetCompleteTime,
+        },
+      });
+      message.success("修改成功");
+    }
+
+    // updateTodoList(accountType, newTodoList, ModifyType.UPDATE);
     setModifyModalVisible(false);
     setEditIndex(-1);
   }
@@ -352,7 +413,7 @@ const App: React.FC<Props> = ({
           </div>
         </header>
         <ul>
-          {renderTodos(todoList)}
+          {renderTodos(todo)}
         </ul>
         <footer>
           <span className='select-all-container'>
