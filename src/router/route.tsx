@@ -29,7 +29,7 @@ const routeChildren = renderRouteConf(null, routerConfig, '/');
 export default class Routers extends React.PureComponent {
 	render() {
 		return (
-  <BrowserRouter>
+  <BrowserRouter basename='/'>
     {routeChildren}
   </BrowserRouter>
 		);

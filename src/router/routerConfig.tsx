@@ -1,7 +1,7 @@
 import SecureLayout from '@/layout/layout';
 
-import App from '@/pages/Index/App';
-import Settings from '@/pages/user/settings/settings';
+import App from '../pages/Index/App';
+import Settings from '../pages/user/settings/settings';
 
 export interface RouterConfigType {
 	path: string;

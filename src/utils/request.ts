@@ -6,6 +6,13 @@ const config: AxiosRequestConfig = {
   timeout: 5000,
 };
 
+export enum ResStatusCode {
+  SUCCESS = 200,
+  ERROR = 400,
+  NOAUTH = 401,
+  PARAMWRONG = 400,
+}
+
 const axiosInstance = axios.create(config);
 
 // axiosInstance.interceptors.request.use((axiosConfig) => {
@@ -19,7 +26,7 @@ const axiosInstance = axios.create(config);
 
 axiosInstance.interceptors.response.use((response: AxiosResponse) => {
   console.log("response", response);
-  if (response.data.id === 400) {
+  if (response.data.id === ResStatusCode.NOAUTH) {
     message.error("未登录，即将跳转到首页");
     window.location.pathname !== '/' && setTimeout(() => {
       window.location.replace("/");

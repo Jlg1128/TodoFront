@@ -4,6 +4,7 @@
     "**/*.css",
     "**/*.less"
   ],
+  "homepage":"http://todo.towardsky.top/",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
