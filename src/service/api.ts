@@ -39,7 +39,7 @@ const api: ApiMapType = {
   },
   getUserByIdOrNickName: {
     url: '/api/user/getUserByIdOrNickName',
-    method: 'post',
+    method: 'get',
   },
   getTodoListById: {
     url: '/api/todo/getTodoListById',
@@ -133,7 +133,7 @@ export function register(user?: User): Promise<ResponseDataType<User>> {
 export function getUserByIdOrNickName(param: { id?: number, nickname?: string }): Promise<ResponseDataType<User>> {
   return new Promise((resolve, reject) => {
     axios(api.getUserByIdOrNickName.url, {
-      data: {
+      params: {
         id: param.id || '',
         nickname: param.nickname || '',
       },

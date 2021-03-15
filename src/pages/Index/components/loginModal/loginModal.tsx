@@ -84,7 +84,6 @@ const LoginModal: React.FC<Props> = ({
                   } catch (error) {
                     console.log(error);
                     message.error("网络错误");
-                    return;
                   }
                 }
                 return Promise.reject('仅支持中文、数字、英文大小写、下划线。');
