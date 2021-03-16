@@ -99,7 +99,6 @@ const LoginModal: React.FC<Props> = ({
             ({ getFieldValue }) => ({
               validator(rule, value) {
                 let strAndNumLengthReg = /^[\s\S]{8,20}$/g;
-                console.log(value);
                 if (value && !strAndNumLengthReg.test(value)) {
                   return Promise.reject('密码需要8-20位');
                 }
