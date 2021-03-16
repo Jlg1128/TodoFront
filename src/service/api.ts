@@ -41,8 +41,14 @@ const api: ApiMapType = {
     url: '/api/user/getUserById',
     method: 'get',
   },
-  getUserByNickname: {
-    url: '/api/user/getUserByNickname',
+  // 用户名是否冲突
+  isUserAlreatExit: {
+    url: '/api/user/isUserAlreatExit',
+    method: 'get',
+  },
+  // 用户是否存在
+  isUserExit: {
+    url: '/api/user/isUserExit',
     method: 'get',
   },
   getTodoListById: {
@@ -139,15 +145,28 @@ export function getUserById(): Promise<ResponseDataType<User>> {
       .catch((err) => reject(err));
   });
 }
-export function getUserByNickname(nickname: string): Promise<ResponseDataType<User>> {
+export function isUserAlreatExit(nickname: string): Promise<ResponseDataType> {
   return new Promise((resolve, reject) => {
-    axios(api.getUserByNickname.url, {
+    axios(api.isUserAlreatExit.url, {
       params: {
         nickname: nickname || '',
       },
-      method: api.getUserByNickname.method,
+      method: api.isUserAlreatExit.method,
     })
-      .then((res: AxiosResponse<ResponseDataType<User>>) => resolve(res.data))
+      .then((res: AxiosResponse<ResponseDataType>) => resolve(res.data))
+      .catch((err) => reject(err));
+  });
+}
+
+export function isUserExit(nickname: string): Promise<ResponseDataType> {
+  return new Promise((resolve, reject) => {
+    axios(api.isUserExit.url, {
+      params: {
+        nickname: nickname || '',
+      },
+      method: api.isUserExit.method,
+    })
+      .then((res: AxiosResponse<ResponseDataType>) => resolve(res.data))
       .catch((err) => reject(err));
   });
 }

@@ -40,7 +40,6 @@ const LoginModal: React.FC<Props> = ({
 
   function onFinish() {
     !!onOk && onOk(form.getFieldValue("username"), form.getFieldValue('password'));
-    // form.resetFields();
   }
 
   return (
@@ -74,13 +73,11 @@ const LoginModal: React.FC<Props> = ({
                 }
                 if (/^[\u4e00-\u9fa50-9A-Za-z_]+$/g.test(value)) {
                   try {
-                    let res = await api.getUserByNickname(form.getFieldValue("username"));
+                    let res = await api.isUserAlreatExit(form.getFieldValue("username"));
                     if (res && res.success) {
-                      if (res.data) {
-                        return Promise.reject('用户已存在');
-                      }
                       return Promise.resolve();
                     }
+                    return Promise.reject('用户已存在');
                   } catch (error) {
                     message.error("网络错误");
                     return Promise.reject(error || '网络异常');
