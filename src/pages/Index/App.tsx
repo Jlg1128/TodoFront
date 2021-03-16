@@ -58,7 +58,6 @@ const App: React.FC<Props> = ({
   const [editVal, setEditVal] = useState<string>('');
   // 所有选中的索引
   const [selectedIndex, setSelectedIndex] = useState<number[]>([]);
-  const [todoList, setTodoList] = useState<TodoItem[]>([]);
   // 是否全选
   const [ifSelectAll, setIfSelectedAll] = useState<boolean>(false);
   const [addModalVisible, setAddModalVisible] = useState<boolean>(false);
@@ -73,10 +72,8 @@ const App: React.FC<Props> = ({
 
   useEffect(() => {
     // 监听回车
-    // @ts-ignore
-    window.addEventListener('keydown', (event) => handleEnterClick(JSON.parse(localStorage.getItem("accountType")), event, contentInputRef.current ? contentInputRef.current.value : ''));
-    // @ts-ignore
-    return () => window.addEventListener('keydown', (event) => handleEnterClick(JSON.parse(localStorage.getItem("accountType")), event, contentInputRef.current ? contentInputRef.current.value : ''));
+    window.addEventListener('keydown', (event) => handleEnterClick(JSON.parse(localStorage.getItem("accountType") || JSON.stringify("member")), event, contentInputRef.current ? contentInputRef.current.value : ''));
+    return () => window.addEventListener('keydown', (event) => handleEnterClick(JSON.parse(localStorage.getItem("accountType") || JSON.stringify("member")), event, contentInputRef.current ? contentInputRef.current.value : ''));
   }, []);
 
   function handleEnterClick(accountType: ACCOUNTTYPEDISPATCHTYPE, event: KeyboardEvent, content: string) {
@@ -87,21 +84,6 @@ const App: React.FC<Props> = ({
       }
     }
   }
-
-  // 监听账户类型的切换改变current todolist
-  useEffect(() => {
-    if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER && userInfo.nickname && userInfo.id !== -1) {
-      dispatch({
-        type: TodoDispatchType.INIT,
-        payload: userInfo.todo_list,
-      });
-    } else {
-      dispatch({
-        type: TodoDispatchType.INIT,
-        payload: JSON.parse(localStorage.getItem("todoList") || '[]'),
-      });
-    }
-  }, [accountType]);
 
   async function handleAdd(accountType: ACCOUNTTYPEDISPATCHTYPE, todoInputMsg: string, oldTodoList: TodoItem[], targetCompleteTime: Moment | null) {
     const needAddItem: TodoItem = {
@@ -244,16 +226,20 @@ const App: React.FC<Props> = ({
     let hasError = false;
     if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER) {
       try {
-        await api.updateTodoListById(userInfo.id, newTodoList);
-        let res = await api.getTodoListById(userInfo.id);
-        if (res.data) {
-          newTodoList = res.data;
-          dispatch({
-            type: TodoDispatchType.INIT,
-            payload: newTodoList,
-          });
+        let updateRes = await api.updateTodoListById(userInfo.id, newTodoList);
+        if (updateRes.success) {
+          let res = await api.getTodoListById(userInfo.id);
+          if (res.success && res.data) {
+            newTodoList = res.data;
+            dispatch({
+              type: TodoDispatchType.INIT,
+              payload: newTodoList,
+            });
+          } else {
+            hasError = true;
+          }
         } else {
-          hasError = false;
+          hasError = true;
         }
       } catch (error) {
         hasError = true;
@@ -263,9 +249,7 @@ const App: React.FC<Props> = ({
     if (!hasError) {
       localStorage.setItem('todoList', JSON.stringify(newTodoList));
       setInputStatus(false);
-      if (!hasError) {
-        type !== ModifyType.FINISH && message.success(`${type}成功`);
-      }
+      type !== ModifyType.FINISH && message.success(`${type}成功`);
     }
   }
 
@@ -369,7 +353,6 @@ const App: React.FC<Props> = ({
       message.success("修改成功");
     }
 
-    // updateTodoList(accountType, newTodoList, ModifyType.UPDATE);
     setModifyModalVisible(false);
     setEditIndex(-1);
   }
@@ -418,7 +401,7 @@ const App: React.FC<Props> = ({
         <footer>
           <span className='select-all-container'>
             <input checked={ifSelectAll} onChange={(e) => selectedAll(e.currentTarget.checked)} type="checkbox" />
-            <label className='hover-button-style select-all-label' htmlFor='selectAll'>
+            <label onClick={() => selectedAll(!ifSelectAll)} className='hover-button-style select-all-label' htmlFor='selectAll'>
               选中全部
             </label>
           </span>

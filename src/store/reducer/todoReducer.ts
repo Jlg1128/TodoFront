@@ -16,6 +16,7 @@ const initialTodo: TodoItem[] = [];
 export const todo = (state = initialTodo, action: { type: TodoDispatchType, payload: any }) => {
   switch (action.type) {
     case TodoDispatchType.INIT:
+      console.log(action.payload);
       return [...action.payload];
     case TodoDispatchType.ADD:
       const id = state.length ? state[state.length - 1].id + 1 : 1;

@@ -3,6 +3,7 @@
 /* eslint-disable max-len */
 import React, { Dispatch, ReactNode, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
+import { AnyAction } from 'redux';
 import LoginModal from '@/pages/Index/components/loginModal/loginModal';
 import RegisterModal from '@/pages/Index/components/registerModal/registerModal';
 import { ACCOUNTTYPEDISPATCHTYPE } from '@/store/reducer/accountTypeReducer';
@@ -10,7 +11,7 @@ import { UserDispatchType } from '@/store/reducer/userInfoReducer';
 import { message } from 'antd';
 import * as api from '@/service/api';
 import { History } from 'history';
-import { AnyAction } from 'redux';
+import emitter from '@/utils/emit';
 import { User } from '@/service/api';
 import dropdownLogo from '@/assets/dropdownicon.png';
 import defaultAvatar from '@/assets/defaultAvatar.jpg';
@@ -40,14 +41,11 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
   });
 
   const [isDropdonw, setIsDropdown] = useState<boolean>(false);
-  // 权限校对
+
   useEffect(() => {
+    // 全局路由权限校对
     if (authPath.includes(history.location.pathname)) {
-      if (JSON.parse(localStorage.getItem("accountType") || JSON.stringify("tourist")) === ACCOUNTTYPEDISPATCHTYPE.TOURIST
-        || Object.keys(JSON.parse(localStorage.getItem("userInfo") || "{}")).length === 0
-        || !JSON.parse(localStorage.getItem("userInfo") || "{}").id
-        || !JSON.parse(localStorage.getItem("userInfo") || "{}").nickname
-      ) {
+      if (accountType === ACCOUNTTYPEDISPATCHTYPE.TOURIST) {
         message.info('请先登录');
         setTimeout(() => {
           history.replace("/");
@@ -61,7 +59,6 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
       if (localStorage.getItem("userInfo")) {
         let user: User = JSON.parse(localStorage.getItem("userInfo") || '{}');
         if (user.id && user.nickname) {
-          console.log(user.todo_list);
           dispatch({
             type: UserDispatchType.LOGIN,
             payload: user,
@@ -78,6 +75,24 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
     }
   }, []);
 
+  useEffect(() => {
+    emitter.on('unlogin', () => {
+      localStorage.clear();
+      sessionStorage.clear();
+      dispatch({
+        type: UserDispatchType.QUIT,
+      });
+      dispatch({
+        type: ACCOUNTTYPEDISPATCHTYPE.TOURIST,
+      });
+      dispatch({
+        type: TodoDispatchType.INIT,
+        payload: [],
+      });
+      setModalsStates({ ...modalState, loginModalVisible: true });
+    });
+  }, []);
+
   function handleJump(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
     e.stopPropagation();
     setModalsStates({
@@ -88,6 +103,7 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
   function jumpToSettings() {
     history.push('/user/settings');
   }
+
   function login(nickname: string, password: string) {
     let flag = false;
     setModalsStates(
@@ -95,13 +111,11 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
         ...modalState, loginModalLoading: true, loginModalVisible: true,
       },
     );
-
     api.login(nickname, password).then((res) => {
       if (res && res.success === true && res.data != null && !!res.data.nickname) {
         localStorage.setItem('userInfo', JSON.stringify(res.data));
         localStorage.setItem('accountType', JSON.stringify(ACCOUNTTYPEDISPATCHTYPE.MEMBER));
         localStorage.setItem('todoList', JSON.stringify(res.data.todo_list || []));
-        // setTodoList(res.data.todo_list);
         dispatch({
           type: UserDispatchType.LOGIN,
           payload: res.data,
@@ -136,18 +150,30 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
       });
     return flag;
   }
-  function quit() {
+  async function quit() {
     localStorage.clear();
-    dispatch({
-      type: UserDispatchType.QUIT,
-    });
-    dispatch({
-      type: ACCOUNTTYPEDISPATCHTYPE.TOURIST,
-    });
-    message.success("退出成功");
-    setTimeout(() => {
-      history.location.pathname !== '/' && history.replace('/');
-    }, 1500);
+    sessionStorage.clear();
+    try {
+      let res = await api.quit(userInfo.id);
+      if (res.success) {
+        dispatch({
+          type: UserDispatchType.QUIT,
+        });
+        dispatch({
+          type: ACCOUNTTYPEDISPATCHTYPE.TOURIST,
+        });
+        dispatch({
+          type: TodoDispatchType.INIT,
+          payload: [],
+        });
+        message.success("退出成功");
+        setTimeout(() => {
+          history.location.pathname !== '/' && history.replace('/');
+        }, 1500);
+      }
+    } catch (error) {
+      message.success("异常错误");
+    }
   }
   function handleLoginCancel() {
     setModalsStates({

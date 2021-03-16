@@ -101,7 +101,7 @@ export function login(nickname: string, password: string): Promise<ResponseDataT
   });
 }
 
-export function quit(id: string): Promise<ResponseDataType> {
+export function quit(id: number): Promise<ResponseDataType> {
   return new Promise((resolve, reject) => {
     axios(api.quit.url, {
       method: api.login.method,
