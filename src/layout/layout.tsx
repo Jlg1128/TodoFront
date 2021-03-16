@@ -42,9 +42,6 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
   });
 
   const [isDropdonw, setIsDropdown] = useState<boolean>(false);
-  useEffect(() => {
-    console.log(accountType);
-  });
 
   useEffect(() => {
     // // 全局路由权限校对
