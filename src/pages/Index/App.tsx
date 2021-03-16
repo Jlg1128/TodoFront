@@ -206,7 +206,7 @@ const App: React.FC<Props> = ({
       });
       localStorage.setItem("userInfo", JSON.stringify(newUser));
     }
-    localStorage.setItem('todoList', JSON.stringify(todo));
+    todo.length && localStorage.setItem('todoList', JSON.stringify(todo));
   }, [todo]);
 
   // 是否选中全部
@@ -226,9 +226,9 @@ const App: React.FC<Props> = ({
     let hasError = false;
     if (accountType === ACCOUNTTYPEDISPATCHTYPE.MEMBER) {
       try {
-        let updateRes = await api.updateTodoListById(userInfo.id, newTodoList);
+        let updateRes = await api.updateTodoListById(newTodoList);
         if (updateRes.success) {
-          let res = await api.getTodoListById(userInfo.id);
+          let res = await api.getTodoList();
           if (res.success && res.data) {
             newTodoList = res.data;
             dispatch({
@@ -408,8 +408,8 @@ const App: React.FC<Props> = ({
           <span onClick={() => seeFinishedTodo()} className='seeCompleted hover-button-style'>
             {mode === TODOMODE.AllTODO ? '查看完成的todo' : '查看所有的todo'}
           </span>
-          <span onClick={() => deleteTodo(selectedIndex)} className={`delete ${selectedStyle} hover-button-style`}>删除</span>
-          <span onClick={() => finishTodo(selectedIndex)} className={`complete ${selectedStyle} hover-button-style`}>完成</span>
+          <span onClick={() => selectedIndex.length && deleteTodo(selectedIndex)} className={`delete ${selectedStyle} hover-button-style`}>删除</span>
+          <span onClick={() => selectedIndex.length && finishTodo(selectedIndex)} className={`complete ${selectedStyle} hover-button-style`}>完成</span>
         </footer>
       </div>
     </div>

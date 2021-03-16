@@ -37,8 +37,12 @@ const api: ApiMapType = {
     url: '/api/user/register',
     method: 'post',
   },
-  getUserByIdOrNickName: {
-    url: '/api/user/getUserByIdOrNickName',
+  getUserById: {
+    url: '/api/user/getUserById',
+    method: 'get',
+  },
+  getUserByNickname: {
+    url: '/api/user/getUserByNickname',
     method: 'get',
   },
   getTodoListById: {
@@ -54,7 +58,7 @@ const api: ApiMapType = {
     method: 'post',
   },
   ifRepeat: {
-    url: '/api/user/nickNameRepeat',
+    url: '/api/user/userInfoIfRepeat',
     method: 'get',
   },
   modifyUser: {
@@ -97,22 +101,18 @@ export function login(nickname: string, password: string): Promise<ResponseDataT
     }).then((res) => {
       resolve(res.data);
     })
-    .catch((err) => reject(err));
+      .catch((err) => reject(err));
   });
 }
 
-export function quit(id: number): Promise<ResponseDataType> {
+export function quit(): Promise<ResponseDataType> {
   return new Promise((resolve, reject) => {
     axios(api.quit.url, {
       method: api.login.method,
-      data: {
-        id,
-      },
     }).then((res) => {
-      console.log(res);
       resolve(res.data);
     })
-    .catch((err) => reject(err));
+      .catch((err) => reject(err));
   });
 }
 
@@ -126,31 +126,36 @@ export function register(user?: User): Promise<ResponseDataType<User>> {
     }).then((res: AxiosResponse<ResponseDataType<User>>) => {
       resolve(res.data);
     })
-    .catch((err) => reject(err));
+      .catch((err) => reject(err));
   });
 }
 
-export function getUserByIdOrNickName(param: { id?: number, nickname?: string }): Promise<ResponseDataType<User>> {
+export function getUserById(): Promise<ResponseDataType<User>> {
   return new Promise((resolve, reject) => {
-    axios(api.getUserByIdOrNickName.url, {
+    axios(api.getUserById.url, {
+      method: api.getUserById.method,
+    })
+      .then((res: AxiosResponse<ResponseDataType<User>>) => resolve(res.data))
+      .catch((err) => reject(err));
+  });
+}
+export function getUserByNickname(nickname: string): Promise<ResponseDataType<User>> {
+  return new Promise((resolve, reject) => {
+    axios(api.getUserByNickname.url, {
       params: {
-        id: param.id || '',
-        nickname: param.nickname || '',
+        nickname: nickname || '',
       },
-      method: api.getUserByIdOrNickName.method,
+      method: api.getUserByNickname.method,
     })
       .then((res: AxiosResponse<ResponseDataType<User>>) => resolve(res.data))
       .catch((err) => reject(err));
   });
 }
 
-export function getTodoListById(id: number): Promise<ResponseDataType<TodoItem[]>> {
+export function getTodoList(): Promise<ResponseDataType<TodoItem[]>> {
   return new Promise((resolve, reject) => {
     axios(api.getTodoListById.url, {
       method: api.getTodoListById.method,
-      params: {
-        id,
-      },
     })
       .then((res: AxiosResponse<ResponseDataType<TodoItem[]>>) => {
         resolve(res.data);
@@ -173,11 +178,10 @@ export function getTodoListNickname(nickname: string): Promise<ResponseDataType<
   });
 }
 
-export function updateTodoListById(id: number, todoList: TodoItem[]): Promise<ResponseDataType> {
+export function updateTodoListById(todoList: TodoItem[]): Promise<ResponseDataType> {
   return new Promise((resolve, reject) => {
     axios(api.updateTodoList.url, {
       data: {
-        id,
         todoList,
       },
       method: api.updateTodoList.method,
@@ -212,11 +216,10 @@ export function modifyUser(user: User): Promise<ResponseDataType> {
   });
 }
 
-export function modifyAvatar(id: number, avatar: string): Promise<ResponseDataType> {
+export function modifyAvatar(avatar: string): Promise<ResponseDataType> {
   return new Promise((resolve, reject) => {
     axios(api.modifyAvatar.url, {
       data: {
-        id,
         avatar,
       },
       method: api.modifyAvatar.method,

@@ -74,18 +74,16 @@ const LoginModal: React.FC<Props> = ({
                 }
                 if (/^[\u4e00-\u9fa50-9A-Za-z_]+$/g.test(value)) {
                   try {
-                    let res = await api.getUserByIdOrNickName({ nickname: form.getFieldValue("username") });
+                    let res = await api.getUserByNickname(form.getFieldValue("username"));
                     if (res && res.success) {
                       if (res.data) {
                         return Promise.reject('用户已存在');
                       }
                       return Promise.resolve();
                     }
-                    return Promise.reject(res.msg);
                   } catch (error) {
-                    console.log(error);
                     message.error("网络错误");
-                    return;
+                    return Promise.reject(error || '网络异常');
                   }
                 }
                 return Promise.reject('仅支持中文、数字、英文大小写、下划线。');

@@ -74,7 +74,8 @@ const LoginModal: React.FC<Props> = ({
                 }
                 if (/^[\u4e00-\u9fa50-9A-Za-z_]+$/g.test(value)) {
                   try {
-                    let res = await api.getUserByIdOrNickName({ nickname: form.getFieldValue('username') });
+                    // 用户名是否存在
+                    let res = await api.getUserByNickname(form.getFieldValue('username'));
                     if (res && res.success) {
                       if (!res.data) {
                         return Promise.reject('用户名不存在');
@@ -82,8 +83,8 @@ const LoginModal: React.FC<Props> = ({
                       return Promise.resolve();
                     }
                   } catch (error) {
-                    console.log(error);
                     message.error("网络错误");
+                    return Promise.reject(error || '异常错误');
                   }
                 }
                 return Promise.reject('仅支持中文、数字、英文大小写、下划线。');
@@ -101,24 +102,6 @@ const LoginModal: React.FC<Props> = ({
           rules={[
             { required: true, message: '请输入密码' },
           ]}
-        // validateFirst={false}
-        // rules={[
-        //   {},
-        //   ({ getFieldValue }) => ({
-        //     validator(rule, value) {
-        //       let headStrReg = /^[a-zA-Z]/gi
-        //       let strAndNumReg = /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]*$/gi
-        //       let strAndNumLengthReg = /^[0-9A-Za-z]{6,20}$/gi
-        //       if (!value) {
-        //         return Promise.reject('请填写登录密码');
-        //       } else if (!strAndNumLengthReg.test(value)) {
-        //         return Promise.reject('登录密码长度必须为6-20位');
-        //       } else {
-        //         return Promise.resolve(value);
-        //       }
-        //     },
-        //   }),
-        // ]}
         >
           <Input.Password
             type="password"

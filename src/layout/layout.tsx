@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import LoginModal from '@/pages/Index/components/loginModal/loginModal';
 import RegisterModal from '@/pages/Index/components/registerModal/registerModal';
-import { ACCOUNTTYPEDISPATCHTYPE } from '@/store/reducer/accountTypeReducer';
+import { account, ACCOUNTTYPEDISPATCHTYPE } from '@/store/reducer/accountTypeReducer';
 import { UserDispatchType } from '@/store/reducer/userInfoReducer';
 import { message } from 'antd';
 import * as api from '@/service/api';
@@ -15,8 +15,8 @@ import emitter from '@/utils/emit';
 import { User } from '@/service/api';
 import dropdownLogo from '@/assets/dropdownicon.png';
 import defaultAvatar from '@/assets/defaultAvatar.jpg';
+import { todo, TodoDispatchType } from '@/store/reducer/todoReducer';
 import './layout.less';
-import { TodoDispatchType } from '@/store/reducer/todoReducer';
 
 type Props = {
   userInfo: User,
@@ -26,11 +26,12 @@ type Props = {
   account: {
     accountType: ACCOUNTTYPEDISPATCHTYPE,
   },
+  todo: api.TodoItem[]
 }
 
 const authPath = ['/user/settings'];
 
-export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, userInfo, account: { accountType }, ...rest }) => {
+export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, userInfo, account: { accountType }, todo, ...rest }) => {
   const [userInfoShow, setrUserInfoShow] = useState<boolean>(false);
   // 登录modal和registermodal状态相关
   const [modalState, setModalsStates] = useState({
@@ -41,9 +42,12 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
   });
 
   const [isDropdonw, setIsDropdown] = useState<boolean>(false);
+  useEffect(() => {
+    console.log(accountType);
+  });
 
   useEffect(() => {
-    // 全局路由权限校对
+    // // 全局路由权限校对
     if (authPath.includes(history.location.pathname)) {
       if (accountType === ACCOUNTTYPEDISPATCHTYPE.TOURIST) {
         message.info('请先登录');
@@ -52,26 +56,28 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
         }, 1500);
       }
     }
-    // 为了浏览器刷新保持登录状态
-    // @ts-ignore
-    if (localStorage.getItem("accountType") && JSON.parse(localStorage.getItem("accountType")) === ACCOUNTTYPEDISPATCHTYPE.MEMBER) {
-      // @ts-ignore
-      if (localStorage.getItem("userInfo")) {
-        let user: User = JSON.parse(localStorage.getItem("userInfo") || '{}');
-        if (user.id && user.nickname) {
-          dispatch({
-            type: UserDispatchType.LOGIN,
-            payload: user,
-          });
-          dispatch({
-            type: ACCOUNTTYPEDISPATCHTYPE.MEMBER,
-          });
-          dispatch({
-            type: TodoDispatchType.INIT,
-            payload: user.todo_list,
-          });
-        }
-      }
+
+    // 保持登录状态
+    if (localStorage.getItem("userInfo") !== null && userInfo.id === -1 && !userInfo.nickname) {
+      api.getUserById()
+        .then((res) => {
+          if (res.success && res.data) {
+            dispatch({
+              type: UserDispatchType.LOGIN,
+              payload: res.data,
+            });
+            dispatch({
+              type: ACCOUNTTYPEDISPATCHTYPE.MEMBER,
+            });
+            dispatch({
+              type: TodoDispatchType.INIT,
+              payload: res.data.todo_list,
+            });
+          }
+        })
+        .catch((err) => {
+          message.error("异常错误");
+        });
     }
   }, []);
 
@@ -114,7 +120,6 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
     api.login(nickname, password).then((res) => {
       if (res && res.success === true && res.data != null && !!res.data.nickname) {
         localStorage.setItem('userInfo', JSON.stringify(res.data));
-        localStorage.setItem('accountType', JSON.stringify(ACCOUNTTYPEDISPATCHTYPE.MEMBER));
         localStorage.setItem('todoList', JSON.stringify(res.data.todo_list || []));
         dispatch({
           type: UserDispatchType.LOGIN,
@@ -146,15 +151,13 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
       }
     })
       .catch((err) => {
-        message.error('网路异常');
+        message.error('网络异常');
       });
     return flag;
   }
   async function quit() {
-    localStorage.clear();
-    sessionStorage.clear();
     try {
-      let res = await api.quit(userInfo.id);
+      let res = await api.quit();
       if (res.success) {
         dispatch({
           type: UserDispatchType.QUIT,
@@ -167,12 +170,14 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
           payload: [],
         });
         message.success("退出成功");
+        localStorage.clear();
+        sessionStorage.clear();
         setTimeout(() => {
           history.location.pathname !== '/' && history.replace('/');
         }, 1500);
       }
     } catch (error) {
-      message.success("异常错误");
+      message.error("异常错误");
     }
   }
   function handleLoginCancel() {
@@ -196,7 +201,6 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
       if (res && res.success === true && res.data != null && !!res.data.nickname) {
         message.success("注册成功，直接为您登录！");
         localStorage.setItem('userInfo', JSON.stringify(res.data));
-        localStorage.setItem('accountType', JSON.stringify(ACCOUNTTYPEDISPATCHTYPE.MEMBER));
         localStorage.setItem('todoList', JSON.stringify(res.data.todo_list || []));
         dispatch({
           type: UserDispatchType.LOGIN,
@@ -210,6 +214,7 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
             ...modalState, registerModalLoading: false, registerModalVisible: false, loginModalVisible: false,
           },
         );
+        setrUserInfoShow(false);
         flag = true;
       } else {
         message.error(res && res.msg);

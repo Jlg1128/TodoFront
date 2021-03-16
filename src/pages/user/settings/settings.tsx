@@ -4,7 +4,6 @@ import React, { Dispatch } from 'react';
 import * as api from '@/service/api';
 import { connect } from 'react-redux';
 import { Form, Input, Button, message } from 'antd';
-import logo1 from '@/assets/logo1.png';
 import './settings.less';
 import { User } from '@/service/api';
 import { UserDispatchType } from '@/store/reducer/userInfoReducer';
@@ -49,7 +48,7 @@ const Settings: React.FC<Props> = (
       // setTimeout(() => {
       //   history.push('/');
       // }, 1500);
-      let user = await api.getUserByIdOrNickName({ id: JSON.parse(localStorage.getItem("userInfo") || '{}').id });
+      let user = await api.getUserById();
       if (user && user.success === true && user.data != null && user.data.nickname) {
         localStorage.setItem('userInfo', JSON.stringify(user.data));
         localStorage.setItem('accountType', JSON.stringify(ACCOUNTTYPEDISPATCHTYPE.MEMBER));
