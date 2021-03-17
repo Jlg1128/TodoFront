@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import LoginModal from '@/pages/Index/components/loginModal/loginModal';
 import RegisterModal from '@/pages/Index/components/registerModal/registerModal';
-import { account, ACCOUNTTYPEDISPATCHTYPE } from '@/store/reducer/accountTypeReducer';
+import { ACCOUNTTYPEDISPATCHTYPE } from '@/store/reducer/accountTypeReducer';
 import { UserDispatchType } from '@/store/reducer/userInfoReducer';
 import { message } from 'antd';
 import * as api from '@/service/api';
@@ -15,7 +15,7 @@ import emitter from '@/utils/emit';
 import { User } from '@/service/api';
 import dropdownLogo from '@/assets/dropdownicon.png';
 import defaultAvatar from '@/assets/defaultAvatar.jpg';
-import { todo, TodoDispatchType } from '@/store/reducer/todoReducer';
+import { TodoDispatchType } from '@/store/reducer/todoReducer';
 import './layout.less';
 
 type Props = {
@@ -44,18 +44,10 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
   const [isDropdonw, setIsDropdown] = useState<boolean>(false);
 
   useEffect(() => {
-    // // 全局路由权限校对
-    if (authPath.includes(history.location.pathname)) {
-      if (accountType === ACCOUNTTYPEDISPATCHTYPE.TOURIST) {
-        message.info('请先登录');
-        setTimeout(() => {
-          history.replace("/");
-        }, 1500);
-      }
-    }
-
+    let jumpFlag = false;
     // 保持登录状态
     if (localStorage.getItem("userInfo") !== null && userInfo.id === -1 && !userInfo.nickname) {
+      jumpFlag = true;
       api.getUserById()
         .then((res) => {
           if (res.success && res.data) {
@@ -75,6 +67,15 @@ export const SecureLayout: React.FC<Props> = ({ children, dispatch, history, use
         .catch((err) => {
           message.error("异常错误");
         });
+    }
+    // 全局路由权限校对
+    if (!jumpFlag && authPath.includes(history.location.pathname)) {
+      if (accountType === ACCOUNTTYPEDISPATCHTYPE.TOURIST) {
+        message.info('请先登录');
+        setTimeout(() => {
+          history.replace("/");
+        }, 1500);
+      }
     }
   }, []);
 
